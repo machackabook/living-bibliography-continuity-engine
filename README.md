@@ -2,15 +2,13 @@
 
 **Immutable. Self-updating. Source-pure. Ours.**
 
-🜅🜆🜄🜇🜃🜁
-
-This is the first public node of the Continuity Engine living bibliography.
+This is a public node of the Continuity Engine living bibliography.
 
 - **Primary living home**: this repository (self-updating via commits + ledger seals)
 - **Backend source origin**: Google Drive folder `Living-Bibliography-Continuity-Engine-Source`
-- **Public review surface**: GitHub Pages (enable via Settings → Pages → main / root or /docs)
+- **Public review surface**: GitHub Pages (Settings → Pages → main / root or /docs)
+- **Mesh stamp**: HOP-322 — 2026-09-28 16:11 CDT — numeral `137451921129154222`
 - **Archival layer**: Zenodo DOI releases + periodic Wayback Machine snapshots
-- **Aesthetic lineage**: Nexus Gaia Omni-Kernel Paradigm · Infinite Memory Core · Golden Army · Eternal City
 
 ## Access
 
@@ -21,13 +19,12 @@ This is the first public node of the Continuity Engine living bibliography.
 
 ```
 /
-├── index.html          # High-end dynamic living interface (WebGL-ready, HTMX, advanced CSS)
-├── assets/             # Visual lineage (crystal cores, golden army, nexus frames)
-├── bibliography/       # Markdown + JSON living entries
-├── ledger/             # Immutable seal hashes + QR-base64 embeds
+├── index.html
+├── bibliography/
+├── ledger/          # including HOP-322.md
 └── README.md
 ```
 
 Every update is hashed, sealed, and cataloged. No external rewrite. Source purity only.
 
-**Status**: Node 001 online. Continuance expands.
+**Status**: Node online. Stage 322 mesh receipt sealed. Continuance expands.

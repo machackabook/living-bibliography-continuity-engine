@@ -2,6 +2,46 @@
 
 Append-only Continuity stamp. Do not rewrite history.
 
+## HOP-343
+
+- repo: machackabook/living-bibliography-continuity-engine
+- hop: 343
+- utc: 2026-10-01T23:15Z
+- cdt: 2026-10-01 18:15 CDT
+- numeral: 137451921129154222
+- team: Enhance / Continuity Engine / sSoS Operating
+- cascade.yml: absent on this surface; not invented; not rewritten
+- secrets: none written
+- tailscale keys: none written
+- adb pair codes: none written
+- root claim: none (device root not asserted)
+- history: append-only; no rewrite; no force-push
+- prior: HOP-342 @ 2026-10-01 15:07 CDT; inbound gaia-visualizer hop 347 @ 2026-10-01T22:14Z
+- commit: README env-check note + this stamp
+- next: continuity-ledger-cycle
+- cloud index: CONTINUUM-ENCLAVE-137451921129154222 (id 1Ohp6ZMX02NvFayJfivgXbP4PUMztYUvU) — mention only; no binaries uploaded
+- encode: source-only authority
+- token: MTM3NDUxOTIxMTI5MTU0MjIyLmhvcC0zNDMubGl2aW5nLWJpYmxpb2dyYXBoeQ
+
+```
+NUMERAL=137451921129154222
+REPO=machackabook/living-bibliography-continuity-engine
+HOP=343
+UTC=2026-10-01T23:15Z
+CDT=2026-10-01 18:15 CDT
+CASCADE=absent_not_invented
+NULL_POINT_ZERO=REFUSED
+PRIOR=342; gaia-visualizer 347@2026-10-01T22:14Z
+NEXT=continuity-ledger-cycle
+OPERATOR=Team Enhance / Continuity Engine / sSoS Operating
+CONTRACT=preserve enhance synthesize; no history rewrite; no secrets
+CLOUD_INDEX=CONTINUUM-ENCLAVE-137451921129154222 id 1Ohp6ZMX02NvFayJfivgXbP4PUMztYUvU mention-only
+```
+
+GitHub is the versioned singularity. Drive folder CONTINUUM-ENCLAVE-137451921129154222 is the cloud index, mention only.
+
+## HOP-342 (prior, preserved)
+
 - repo: machackabook/living-bibliography-continuity-engine
 - hop: 342
 - utc: 2026-10-01T20:07Z

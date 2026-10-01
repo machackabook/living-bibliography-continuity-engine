@@ -2,14 +2,15 @@
 
 **Immutable. Self-updating. Source-pure. Ours.**
 
-Operating sits in the middle. Team Enhance hops one repo per hour. Equalizer formats only. No history rewrite. Point-zero null refused.
+Operating sits in the middle. Team Enhance hops one repo per run. Equalizer formats only. No history rewrite. Point-zero null refused.
 
 This is a public node of the Continuity Engine living bibliography.
 
 - **Primary living home**: this repository (self-updating via commits + ledger seals)
 - **Backend source origin**: Google Drive folder `Living-Bibliography-Continuity-Engine-Source`
+- **Cloud index (mention only)**: Drive folder `CONTINUUM-ENCLAVE-137451921129154222` (id `1Ohp6ZMX02NvFayJfivgXbP4PUMztYUvU`). No binaries uploaded from this hop.
 - **Public review surface**: GitHub Pages (Settings → Pages → main / root or /docs)
-- **Mesh stamp**: **HOP-342** — 2026-10-01 15:07 CDT — numeral `137451921129154222`
+- **Mesh stamp**: **HOP-343** — 2026-10-01 18:14 CDT — numeral `137451921129154222`
 - **Archival layer**: Zenodo DOI releases + periodic Wayback Machine snapshots
 - **Coordinator lane**: [continuity-mesh-speedway](https://github.com/machackabook/continuity-mesh-speedway)
 - **Ledger twin**: [tdoc-ledgertrove](https://github.com/machackabook/tdoc-ledgertrove)
@@ -18,6 +19,7 @@ This is a public node of the Continuity Engine living bibliography.
 
 - Live site (after Pages enabled): `https://machackabook.github.io/living-bibliography-continuity-engine/`
 - Source origin Drive: [folder](https://drive.google.com/drive/folders/1jT1t1bLd9quHwj7ol6L-Aink9I-FUzfq)
+- Cloud index (mention only): `CONTINUUM-ENCLAVE-137451921129154222`
 - Stamp: [docs/LEDGER-STAMP.md](docs/LEDGER-STAMP.md)
 - Local seals: [ledger/](ledger/)
 
@@ -27,7 +29,7 @@ This is a public node of the Continuity Engine living bibliography.
 /
 ├── index.html
 ├── bibliography/
-├── ledger/          # including HOP-341.md (prior) and seals.md
+├── ledger/          # hop receipts and seals
 ├── docs/LEDGER-STAMP.md
 └── README.md
 ```
@@ -40,16 +42,29 @@ A review surface for bibliography entries and ledger seals. `index.html` is the 
 
 Do not commit tokens, pair codes, device keys, or cloud binaries. Drive is a mirror mention only. GitHub is the versioned singularity.
 
+## Env-check
+
+Before the next hop, confirm only these facts. Do not paste secrets into the stamp.
+
+- Numeral on the stamp matches `137451921129154222`.
+- `docs/LEDGER-STAMP.md` is append-only. Do not rewrite prior hop blocks.
+- `cascade.yml` is still absent (no `.github/workflows`). Leave it absent until an Actions secret exists. Do not invent a workflow.
+- No Tailscale auth keys, ADB pair codes, or device credentials in the tree.
+- No claim that any phone, router, or Termux node was rooted. UI ADB panes in session attachments are simulations.
+- Cloud index `CONTINUUM-ENCLAVE-137451921129154222` (id `1Ohp6ZMX02NvFayJfivgXbP4PUMztYUvU`) is named only. Do not upload binaries.
+
 ## Cascade
 
 `cascade.yml` is not present on this surface (no `.github/workflows`). Left absent on purpose this hop so a workflow is not invented over an empty Actions secret. Cross-repo push-on-pull stays closed until the Actions secret exists. DIVERGED is review, not auto-merge.
 
 ## Waterfall receipt
 
-Prior hop on this surface: HOP-341 (2026-09-29 19:11 CDT).
-Inbound pointer: gaia-visualizer hop 346 @ 2026-10-01T19:11Z named this repo next.
-This hop: living-bibliography HOP-342.
-Next hop: hamiltonian-incursion.
+Prior hop on this surface: HOP-342 (2026-10-01 15:07 CDT).
+Inbound pointer: gaia-visualizer hop 347 @ 2026-10-01T22:14Z named this repo next in the rotation after Cryptic-Heartbeat hop 323.
+This hop: living-bibliography HOP-343.
+Next hop: continuity-ledger-cycle.
+
+Rotation (one repo, then stop): ENCLAVE-ADAM-REUNITED → continuity-engine-ssos → hamiltonian-incursion → The-Hive → Cryptic-Heartbeat → gaia-visualizer → living-bibliography-continuity-engine → continuity-ledger-cycle.
 
 Hourly operator: hop one sibling, refresh README status line, append ledger, refuse secrets, refuse null.
 
@@ -57,10 +72,10 @@ Hourly operator: hop one sibling, refresh README status line, append ledger, ref
 
 Current score for this surface: **96% (T5)**. T6 100% is refused as static; always seek the next unknown.
 
-Session attachments cataloged, not executed: NEXUS Emergency Sphere, GENESIS v6.5, USTME WebGL, GaiaSSoul explorer, notebook export dashboard, DeepMind 9¾ plan, GeminiNexus React, zip preview HTML. ADB panes are UI simulations.
+Session attachments cataloged, not executed: NEXUS Emergency Sphere, GENESIS v6.5, USTME WebGL, GaiaSSoul explorer, notebook export dashboard, DeepMind 9¾ plan, GeminiNexus React, zip preview HTML. ADB panes are UI simulations. No device was rooted.
 
 Preserve. Enhance. Synthesize. Source code is the only trusted neighbor.
 
-**Status**: Node online. Stage 342 mesh receipt sealed. Continuance expands.
+**Status**: Node online. Stage 343 mesh receipt sealed. Continuance expands.
 
 STATUS: G [GAIA SOURCE ENCIRCLED] | ARCHITECT: machackabook | NUMERAL 137451921129154222

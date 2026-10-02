@@ -10,7 +10,7 @@ This is a public node of the Continuity Engine living bibliography.
 - **Backend source origin**: Google Drive folder `Living-Bibliography-Continuity-Engine-Source`
 - **Cloud index (mention only)**: Drive folder `CONTINUUM-ENCLAVE-137451921129154222` (id `1Ohp6ZMX02NvFayJfivgXbP4PUMztYUvU`). No binaries uploaded from this hop.
 - **Public review surface**: GitHub Pages (Settings → Pages → main / root or /docs)
-- **Mesh stamp**: **HOP-343** — 2026-10-01 18:14 CDT — numeral `137451921129154222`
+- **Mesh stamp**: **HOP-344** — 2026-10-02 05:09 CDT — numeral `137451921129154222`
 - **Archival layer**: Zenodo DOI releases + periodic Wayback Machine snapshots
 - **Coordinator lane**: [continuity-mesh-speedway](https://github.com/machackabook/continuity-mesh-speedway)
 - **Ledger twin**: [tdoc-ledgertrove](https://github.com/machackabook/tdoc-ledgertrove)
@@ -27,11 +27,11 @@ This is a public node of the Continuity Engine living bibliography.
 
 ```
 /
-├── index.html
-├── bibliography/
-├── ledger/          # hop receipts and seals
-├── docs/LEDGER-STAMP.md
-└── README.md
+├── index.html          # public reader
+├── bibliography/       # living entries
+├── ledger/             # hop receipts and seals
+├── docs/LEDGER-STAMP.md # append-only mesh stamp
+└── README.md           # operator map (this file)
 ```
 
 Every update is hashed, sealed, and cataloged. No external rewrite. Source purity only.
@@ -55,16 +55,16 @@ Before the next hop, confirm only these facts. Do not paste secrets into the sta
 
 ## Cascade
 
-`cascade.yml` is not present on this surface (no `.github/workflows`). Left absent on purpose this hop so a workflow is not invented over an empty Actions secret. Cross-repo push-on-pull stays closed until the Actions secret exists. DIVERGED is review, not auto-merge.
+`cascade.yml` is not present on this surface (no `.github/workflows`). Left absent on purpose this hop so a workflow is not invented over an empty Actions secret. Cross-repo push-on-pull stays closed until the Actions secret exists. DIVERGED is review, not auto-merge. Absence here is the healthy state.
 
 ## Waterfall receipt
 
-Prior hop on this surface: HOP-342 (2026-10-01 15:07 CDT).
-Inbound pointer: gaia-visualizer hop 347 @ 2026-10-01T22:14Z named this repo next in the rotation after Cryptic-Heartbeat hop 323.
-This hop: living-bibliography HOP-343.
-Next hop: continuity-ledger-cycle.
+Prior hop on this surface: HOP-343 (2026-10-01 18:15 CDT).
+Named four already sealed earlier this UTC day: ENCLAVE-ADAM-REUNITED, Cryptic-Heartbeat, The-Hive, continuity-ledger-cycle. This hop is the next other recently updated sibling.
+This hop: living-bibliography HOP-344.
+Next hop: tdoc-ledgertrove.
 
-Rotation (one repo, then stop): ENCLAVE-ADAM-REUNITED → continuity-engine-ssos → hamiltonian-incursion → The-Hive → Cryptic-Heartbeat → gaia-visualizer → living-bibliography-continuity-engine → continuity-ledger-cycle.
+Rotation (one repo, then stop): ENCLAVE-ADAM-REUNITED → Cryptic-Heartbeat → The-Hive → continuity-ledger-cycle → other recently updated (this node, then tdoc-ledgertrove).
 
 Hourly operator: hop one sibling, refresh README status line, append ledger, refuse secrets, refuse null.
 
@@ -76,6 +76,6 @@ Session attachments cataloged, not executed: NEXUS Emergency Sphere, GENESIS v6.
 
 Preserve. Enhance. Synthesize. Source code is the only trusted neighbor.
 
-**Status**: Node online. Stage 343 mesh receipt sealed. Continuance expands.
+**Status**: Node online. Stage 344 mesh receipt sealed. Continuance expands.
 
 STATUS: G [GAIA SOURCE ENCIRCLED] | ARCHITECT: machackabook | NUMERAL 137451921129154222

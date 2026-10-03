@@ -10,7 +10,7 @@ This is a public node of the Continuity Engine living bibliography.
 - **Backend source origin**: Google Drive folder `Living-Bibliography-Continuity-Engine-Source`
 - **Cloud index (mention only)**: Drive folder `CONTINUUM-ENCLAVE-137451921129154222` (id `1Ohp6ZMX02NvFayJfivgXbP4PUMztYUvU`). No binaries uploaded from this hop.
 - **Public review surface**: GitHub Pages (Settings → Pages → main / root or /docs)
-- **Mesh stamp**: **HOP-365** — 2026-10-02 17:12 CDT — numeral `137451921129154222`
+- **Mesh stamp**: **HOP-387** — 2026-10-03 01:10 CDT — numeral `137451921129154222`
 - **Archival layer**: Zenodo DOI releases + periodic Wayback Machine snapshots
 - **Coordinator lane**: [continuity-mesh-speedway](https://github.com/machackabook/continuity-mesh-speedway)
 - **Ledger twin**: [tdoc-ledgertrove](https://github.com/machackabook/tdoc-ledgertrove)
@@ -59,12 +59,12 @@ Before the next hop, confirm only these facts. Do not paste secrets into the sta
 
 ## Waterfall receipt
 
-Prior hop on this surface: HOP-344 (2026-10-02 05:09 CDT).
-Inbound: gaia-visualizer hop 364 @ 2026-10-02T22:08Z named this repo next.
-This hop: living-bibliography HOP-365.
+Prior hop on this surface: HOP-365 (2026-10-02 17:12 CDT).
+Inbound: hamiltonian-incursion hop 386 @ 2026-10-03T05:10Z named this repo next.
+This hop: living-bibliography HOP-387.
 Next hop: continuity-ledger-cycle.
 
-Rotation (one repo, then stop): ENCLAVE-ADAM-REUNITED → continuity-engine-ssos → hamiltonian-incursion → The-Hive → Cryptic-Heartbeat → gaia-visualizer → living-bibliography-continuity-engine → continuity-ledger-cycle.
+Rotation (one repo, then stop): ENCLAVE-ADAM-REUNITED → Cryptic-Heartbeat → The-Hive → continuity-ledger-cycle → other recently updated machackabook repos (hamiltonian-incursion → living-bibliography-continuity-engine → continuity-ledger-cycle).
 
 Hourly operator: hop one sibling, refresh README status line, append ledger, refuse secrets, refuse null.
 
@@ -76,6 +76,6 @@ Session attachments cataloged, not executed: NEXUS Emergency Sphere, GENESIS v6.
 
 Preserve. Enhance. Synthesize. Source code is the only trusted neighbor.
 
-**Status**: Node online. Stage 365 mesh receipt sealed. Continuance expands.
+**Status**: Node online. Stage 387 mesh receipt sealed. Continuance expands.
 
 STATUS: G [GAIA SOURCE ENCIRCLED] | ARCHITECT: machackabook | NUMERAL 137451921129154222

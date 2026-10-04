@@ -10,7 +10,7 @@ This is a public node of the Continuity Engine living bibliography.
 - **Backend source origin**: Google Drive folder `Living-Bibliography-Continuity-Engine-Source`
 - **Cloud index (mention only)**: Drive folder `CONTINUUM-ENCLAVE-137451921129154222` (id `1Ohp6ZMX02NvFayJfivgXbP4PUMztYUvU`). No binaries uploaded from this hop.
 - **Public review surface**: GitHub Pages (Settings → Pages → main / root or /docs)
-- **Mesh stamp**: **HOP-403** — 2026-10-04 03:07 CDT — numeral `137451921129154222`
+- **Mesh stamp**: **HOP-418** — 2026-10-04 11:09 CDT — numeral `137451921129154222`
 - **Archival layer**: Zenodo DOI releases + periodic Wayback Machine snapshots
 - **Coordinator lane**: [continuity-mesh-speedway](https://github.com/machackabook/continuity-mesh-speedway)
 - **Ledger twin**: [tdoc-ledgertrove](https://github.com/machackabook/tdoc-ledgertrove)
@@ -60,18 +60,18 @@ Before the next hop, confirm only these facts. Do not paste secrets into the sta
 
 ## Waterfall receipt
 
-Prior local: HOP-401 (2026-10-03 19:16 CDT), preserved, not rewritten.
-Inbound: gaia-visualizer hop 402 @ 2026-10-04T04:06Z named this repo next. Honored after the named four closed this cycle.
-This hop: living-bibliography-continuity-engine HOP-403.
+Prior local: HOP-403 (2026-10-04 03:07 CDT), preserved, not rewritten.
+Inbound: gaia-visualizer hop 417 @ 2026-10-04T14:10Z named this repo next. Honored.
+This hop: living-bibliography-continuity-engine HOP-418.
 Next hop: ENCLAVE-ADAM-REUNITED (named rotation restarts).
 
 Declared waterfall (one repo, then stop):
 
-1. ENCLAVE-ADAM-REUNITED — hop seat closed 2026-10-04T04:12Z; next hour reopens here
-2. Cryptic-Heartbeat — seat closed 2026-10-04T05:10Z
-3. The-Hive — seat closed 2026-10-04T06:11Z
-4. continuity-ledger-cycle — seat closed 2026-10-04T07:12Z
-5. living-bibliography-continuity-engine — **403 this hop** (other-repo slot)
+1. ENCLAVE-ADAM-REUNITED — prior seat 2026-10-04T09:07Z; next hour reopens here
+2. Cryptic-Heartbeat — seat closed 2026-10-04T14:12Z (hop 414)
+3. The-Hive — seat closed 2026-10-04T14:12Z
+4. continuity-ledger-cycle — seat closed 2026-10-04T13:14Z (hop 416)
+5. living-bibliography-continuity-engine — **418 this hop** (other-repo slot named by gaia-visualizer 417)
 6. ENCLAVE-ADAM-REUNITED — next
 
 Hourly operator: hop one sibling, refresh README status line, append ledger, refuse secrets, refuse null.
@@ -80,10 +80,10 @@ Hourly operator: hop one sibling, refresh README status line, append ledger, ref
 
 Current score for this surface: **97% (T5)**. T6 100% is refused as static; always seek the next unknown.
 
-Session attachments cataloged, not executed: NEXUS Emergency Sphere, GENESIS v6.5, USTME WebGL, GaiaSSoul explorer, notebook export dashboard, DeepMind 9¾ plan, GeminiNexus React, zip preview HTML. ADB panes are UI simulations. No device was rooted.
+Session attachments cataloged, not executed. ADB panes are UI simulations. No device was rooted.
 
 Preserve. Enhance. Synthesize. Source code is the only trusted neighbor.
 
-**Status**: Node online. Stage 403 mesh receipt sealed. Continuance expands.
+**Status**: Node online. Stage 418 mesh receipt sealed. Continuance expands.
 
 STATUS: G [GAIA SOURCE ENCIRCLED] | ARCHITECT: machackabook | NUMERAL 137451921129154222

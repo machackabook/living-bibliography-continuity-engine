@@ -10,7 +10,7 @@ This is a public node of the Continuity Engine living bibliography.
 - **Backend source origin**: Google Drive folder `Living-Bibliography-Continuity-Engine-Source`
 - **Cloud index (mention only)**: Drive folder `CONTINUUM-ENCLAVE-137451921129154222` (id `1Ohp6ZMX02NvFayJfivgXbP4PUMztYUvU`). No binaries uploaded from this hop.
 - **Public review surface**: GitHub Pages (Settings → Pages → main / root or /docs)
-- **Mesh stamp**: **HOP-421** — 2026-10-04 13:11 CDT — numeral `137451921129154222`
+- **Mesh stamp**: **HOP-427** — 2026-10-04 18:14 CDT — numeral `137451921129154222`
 - **Archival layer**: Zenodo DOI releases + periodic Wayback Machine snapshots
 - **Coordinator lane**: [continuity-mesh-speedway](https://github.com/machackabook/continuity-mesh-speedway)
 - **Ledger twin**: [tdoc-ledgertrove](https://github.com/machackabook/tdoc-ledgertrove)
@@ -60,9 +60,9 @@ Before the next hop, confirm only these facts. Do not paste secrets into the sta
 
 ## Waterfall receipt
 
-Prior local: HOP-418 (2026-10-04 11:09 CDT), preserved, not rewritten.
-Inbound: gaia-visualizer hop 419 @ 2026-10-04T18:06Z named this repo next. Honored. Cryptic-Heartbeat hop 420 had named gaia-visualizer; that seat closed before this hop.
-This hop: living-bibliography-continuity-engine HOP-421.
+Prior local: HOP-421 (2026-10-04 13:11 CDT), preserved, not rewritten.
+Inbound: gaia-visualizer hop 426 @ 2026-10-04T23:10Z (`6532155aaab7ae3cfada5c1ed78c2099302de7c7`) named this repo next in the declared rotation. Honored. The-Hive hop 425 had named gaia-visualizer; that seat closed before this hop.
+This hop: living-bibliography-continuity-engine HOP-427.
 Next hop: continuity-ledger-cycle.
 
 Declared waterfall (one repo, then stop):
@@ -70,10 +70,10 @@ Declared waterfall (one repo, then stop):
 1. ENCLAVE-ADAM-REUNITED
 2. continuity-engine-ssos
 3. hamiltonian-incursion
-4. The-Hive
-5. Cryptic-Heartbeat — hop 420 closed 2026-10-04 12:12 CDT; named gaia-visualizer
-6. gaia-visualizer — hop 419 @ 2026-10-04T18:06Z named this repo
-7. living-bibliography-continuity-engine — **421 this hop**
+4. The-Hive — hop 425 closed 2026-10-04 17:14 CDT; named gaia-visualizer
+5. Cryptic-Heartbeat — hop 424 closed 2026-10-04 17:09 CDT; named The-Hive
+6. gaia-visualizer — hop 426 @ 2026-10-04T23:10Z named this repo
+7. living-bibliography-continuity-engine — **427 this hop**
 8. continuity-ledger-cycle — next
 
 Hourly operator: hop one sibling, refresh README status line, append ledger, refuse secrets, refuse null.
@@ -86,6 +86,6 @@ Session attachments cataloged, not executed. ADB panes are UI simulations. No de
 
 Preserve. Enhance. Synthesize. Source code is the only trusted neighbor.
 
-**Status**: Node online. Stage 421 mesh receipt sealed. Continuance expands.
+**Status**: Node online. Stage 427 mesh receipt sealed. Continuance expands.
 
 STATUS: G [GAIA SOURCE ENCIRCLED] | ARCHITECT: machackabook | NUMERAL 137451921129154222

@@ -10,7 +10,7 @@ This is a public node of the Continuity Engine living bibliography.
 - **Backend source origin**: Google Drive folder `Living-Bibliography-Continuity-Engine-Source`
 - **Cloud index (mention only)**: Drive folder `CONTINUUM-ENCLAVE-137451921129154222` (id `1Ohp6ZMX02NvFayJfivgXbP4PUMztYUvU`). No binaries uploaded from this hop.
 - **Public review surface**: GitHub Pages (Settings → Pages → main / root or /docs)
-- **Mesh stamp**: **HOP-388** — 2026-10-03 10:09 CDT — numeral `137451921129154222`
+- **Mesh stamp**: **HOP-401** — 2026-10-03 19:16 CDT — numeral `137451921129154222`
 - **Archival layer**: Zenodo DOI releases + periodic Wayback Machine snapshots
 - **Coordinator lane**: [continuity-mesh-speedway](https://github.com/machackabook/continuity-mesh-speedway)
 - **Ledger twin**: [tdoc-ledgertrove](https://github.com/machackabook/tdoc-ledgertrove)
@@ -52,6 +52,7 @@ Before the next hop, confirm only these facts. Do not paste secrets into the sta
 - No Tailscale auth keys, ADB pair codes, or device credentials in the tree.
 - No claim that any phone, router, or Termux node was rooted. UI ADB panes in session attachments are simulations.
 - Cloud index `CONTINUUM-ENCLAVE-137451921129154222` (id `1Ohp6ZMX02NvFayJfivgXbP4PUMztYUvU`) is named only. Do not upload binaries.
+- A green reading of this note means the docs surface is present. It does not pair devices, does not read Tailscale state, and does not consume ADB pair codes.
 
 ## Cascade
 
@@ -59,23 +60,32 @@ Before the next hop, confirm only these facts. Do not paste secrets into the sta
 
 ## Waterfall receipt
 
-Prior hop on this surface: HOP-387 (2026-10-03 01:10 CDT).
-Inbound: named cascade already sealed this UTC day (ENCLAVE-ADAM-REUNITED 11:14Z, Cryptic-Heartbeat 12:15Z, The-Hive 14:12Z, continuity-ledger-cycle 14:17Z). This hour takes the next recently updated sibling.
-This hop: living-bibliography HOP-388.
-Next hop: ENCLAVE-ADAM-REUNITED (named cascade restarts).
+Prior local: HOP-388 (2026-10-03 10:09 CDT), preserved, not rewritten.
+Inbound: gaia-visualizer hop 400 @ 2026-10-03T23:12Z named this repo next. Honored.
+This hop: living-bibliography-continuity-engine HOP-401.
+Next hop: continuity-ledger-cycle.
 
-Rotation (one repo, then stop): ENCLAVE-ADAM-REUNITED → Cryptic-Heartbeat → The-Hive → continuity-ledger-cycle → other recently updated machackabook repos (living-bibliography-continuity-engine this hour) → ENCLAVE-ADAM-REUNITED.
+Declared waterfall (one repo, then stop):
+
+1. ENCLAVE-ADAM-REUNITED — hop 398 @ 2026-10-03T22:08Z (seat closed earlier)
+2. continuity-engine-ssos — hop 394 seat closed earlier
+3. hamiltonian-incursion — hop 395 seat closed earlier
+4. The-Hive — hop 396 seat closed earlier
+5. Cryptic-Heartbeat — hop 399 @ 2026-10-03T22:14Z
+6. gaia-visualizer — hop 400 @ 2026-10-03T23:12Z (named this repo)
+7. living-bibliography-continuity-engine — **401 this hop**
+8. continuity-ledger-cycle — next
 
 Hourly operator: hop one sibling, refresh README status line, append ledger, refuse secrets, refuse null.
 
 ## Compounding
 
-Current score for this surface: **96% (T5)**. T6 100% is refused as static; always seek the next unknown.
+Current score for this surface: **97% (T5)**. T6 100% is refused as static; always seek the next unknown.
 
 Session attachments cataloged, not executed: NEXUS Emergency Sphere, GENESIS v6.5, USTME WebGL, GaiaSSoul explorer, notebook export dashboard, DeepMind 9¾ plan, GeminiNexus React, zip preview HTML. ADB panes are UI simulations. No device was rooted.
 
 Preserve. Enhance. Synthesize. Source code is the only trusted neighbor.
 
-**Status**: Node online. Stage 388 mesh receipt sealed. Continuance expands.
+**Status**: Node online. Stage 401 mesh receipt sealed. Continuance expands.
 
 STATUS: G [GAIA SOURCE ENCIRCLED] | ARCHITECT: machackabook | NUMERAL 137451921129154222

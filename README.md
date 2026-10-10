@@ -10,7 +10,7 @@ This is a public node of the Continuity Engine living bibliography.
 - **Backend source origin**: Google Drive folder `Living-Bibliography-Continuity-Engine-Source`
 - **Cloud index (mention only)**: Drive folder `CONTINUUM-ENCLAVE-137451921129154222` (id `1Ohp6ZMX02NvFayJfivgXbP4PUMztYUvU`). No binaries uploaded from this hop.
 - **Public review surface**: GitHub Pages (Settings → Pages → main / root or /docs)
-- **Mesh stamp**: **HOP-553** — 2026-10-09 15:09 CDT — numeral `137451921129154222`
+- **Mesh stamp**: **HOP-575** — 2026-10-10 18:14 CDT — numeral `137451921129154222`
 - **Archival layer**: Zenodo DOI releases + periodic Wayback Machine snapshots
 - **Coordinator lane**: [continuity-mesh-speedway](https://github.com/machackabook/continuity-mesh-speedway)
 - **Ledger twin**: [tdoc-ledgertrove](https://github.com/machackabook/tdoc-ledgertrove)
@@ -58,25 +58,26 @@ Before the next hop, confirm only these facts. Do not paste secrets into the sta
 
 `cascade.yml` is not present on this surface (no `.github`). Left absent on purpose this hop so a workflow is not invented over an empty Actions secret. Cross-repo push-on-pull stays closed until the Actions secret exists. DIVERGED is review, not auto-merge. Absence here is the healthy state.
 
-## Waterfall receipt (hop 553)
+## Waterfall receipt (hop 575)
 
-* utc: 2026-10-09T20:09Z
-* cdt: 2026-10-09 15:09 CDT
-* prior named seat: gaia-visualizer hop 552 @ 2026-10-09T19:15Z (`9b2845aa4c240db19be3d94732eda900274a1565`) closed the hour and named this repo. Honored. Not re-touched.
-* prior local: HOP-539 @ 2026-10-09T06:11Z preserved in the stamp file; not rewritten
-* this hop: README pointer refreshed; append-only stamp; cascade.yml still absent, not invented
+* utc: 2026-10-10T23:14Z
+* cdt: 2026-10-10 18:14 CDT
+* prior named seat: gaia-visualizer hop 569 @ 2026-10-10T21:09Z closed and named this repo next. Honored. Not re-touched.
+* prior local: HOP-553 @ 2026-10-09T20:09Z preserved in the stamp file; not rewritten
+* this hop: README waterfall aligned to declared operator rotation; append-only stamp; cascade.yml still absent, not invented; env-check clarity reinforced (tree gate only)
 * cloud index mention only: CONTINUUM-ENCLAVE-137451921129154222 (id 1Ohp6ZMX02NvFayJfivgXbP4PUMztYUvU); no binaries uploaded
-* next: living-system-runtime
+* next: continuity-ledger-cycle
 
 Declared waterfall (one repo, then stop):
 
-1. ENCLAVE-ADAM-REUNITED — hop 547 closed (not re-touched)
-2. Cryptic-Heartbeat — hop 551 closed (not re-touched)
-3. The-Hive — hop 544 closed (not re-touched)
-4. continuity-ledger-cycle — hop 545 closed (not re-touched)
-5. gaia-visualizer — hop 552 closed @ 2026-10-09T19:15Z (`9b2845aa4c240db19be3d94732eda900274a1565`); not re-touched
-6. living-bibliography-continuity-engine — **553 this hop**
-7. living-system-runtime — next
+1. ENCLAVE-ADAM-REUNITED — hop 570 closed. Not re-touched.
+2. continuity-engine-ssos — hop 570 closed. Not re-touched.
+3. hamiltonian-incursion — hop 571 closed. Not re-touched.
+4. The-Hive — hop 572 closed. Not re-touched.
+5. Cryptic-Heartbeat — hop 573 closed. Not re-touched.
+6. gaia-visualizer — hop 569 closed @ 2026-10-10T21:09Z. Named this seat. Not re-touched.
+7. living-bibliography-continuity-engine — **575 this hop**
+8. continuity-ledger-cycle — next
 
 Hourly operator: hop one sibling, refresh README status line, append ledger, refuse secrets, refuse null.
 
@@ -88,6 +89,6 @@ Session attachments cataloged, not executed. ADB panes are UI simulations. No de
 
 Preserve. Enhance. Synthesize. Source code is the only trusted neighbor.
 
-**Status**: Node online. Stage 553 mesh receipt sealed. Continuance expands.
+**Status**: Node online. Stage 575 mesh receipt sealed. Continuance expands.
 
 STATUS: G [GAIA SOURCE ENCIRCLED] | ARCHITECT: machackabook | NUMERAL 137451921129154222

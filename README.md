@@ -10,7 +10,7 @@ This is a public node of the Continuity Engine living bibliography.
 - **Backend source origin**: Google Drive folder `Living-Bibliography-Continuity-Engine-Source`
 - **Cloud index (mention only)**: Drive folder `CONTINUUM-ENCLAVE-137451921129154222` (id `1Ohp6ZMX02NvFayJfivgXbP4PUMztYUvU`). No binaries uploaded from this hop.
 - **Public review surface**: GitHub Pages (Settings → Pages → main / root or /docs)
-- **Mesh stamp**: **HOP-907** — 2026-10-27T21:08Z — numeral `137451921129154222`
+- **Mesh stamp**: **HOP-913** — 2026-10-28T03:12Z — numeral `137451921129154222`
 - **Archival layer**: Zenodo DOI releases + periodic Wayback Machine snapshots
 - **Coordinator lane**: [continuity-mesh-speedway](https://github.com/machackabook/continuity-mesh-speedway)
 - **Ledger twin**: [tdoc-ledgertrove](https://github.com/machackabook/tdoc-ledgertrove)
@@ -52,19 +52,19 @@ Before the next hop, confirm only these facts. Do not paste secrets into the sta
 - No Tailscale auth keys, ADB pair codes, or device credentials in the tree.
 - No claim that any phone, router, or Termux node was rooted. UI ADB panes in session attachments are simulations.
 - Cloud index `CONTINUUM-ENCLAVE-137451921129154222` (id `1Ohp6ZMX02NvFayJfivgXbP4PUMztYUvU`) is named only. Do not upload binaries.
-- A green reading of this note means the docs surface is present. It does not pair devices, does not read Tailscale state, and does not consume ADB pair codes. A found key is a stop, not a stamp. This hop does not probe wireless debugging. Never claim a device was rooted. Missing keys are the correct state.
+- A green reading of this note means the docs surface is present. It does not pair devices, does not read Tailscale state, and does not consume ADB pair codes. A found key is a stop, not a stamp. This hop does not probe wireless debugging. Never claim a device was rooted. Missing keys are the correct state. Green is presence, not privilege.
 
 ## Cascade
 
 `cascade.yml` is not present on this surface (no `.github`). Left absent on purpose this hop so a workflow is not invented over an empty Actions secret. Cross-repo push-on-pull stays closed until the Actions secret exists. DIVERGED is review, not auto-merge. Absence here is the healthy state.
 
-## Waterfall receipt (hop 907)
+## Waterfall receipt (hop 913)
 
-* utc: 2026-10-27T21:08Z
-* cdt: 2026-10-27 16:08 CDT
-* prior named seat: gaia-visualizer hop 906 @ 2026-10-27T21:07Z. Honored. Not re-touched.
-* prior local: HOP-904 @ 2026-10-27T17:15Z preserved in the stamp file; not rewritten
-* this hop: waterfall advance after gaia-visualizer 906. Append-only stamp advanced to 907. Cascade.yml still absent, not invented. No secrets written. No device rooted. Drive index mentioned only.
+* utc: 2026-10-28T03:12Z
+* cdt: 2026-10-27 22:12 CDT
+* prior named seat: gaia-visualizer hop 912 @ 2026-10-28T03:07Z. Honored. Not re-touched.
+* prior local: HOP-907 @ 2026-10-27T21:08Z preserved in the stamp file; not rewritten
+* this hop: waterfall advance after gaia-visualizer 912. Append-only stamp advanced to 913. Cascade.yml still absent, not invented. No secrets written. No device rooted. Drive index mentioned only. Env-check reinforced as tree gate only.
 * cloud index mention only: CONTINUUM-ENCLAVE-137451921129154222 (id 1Ohp6ZMX02NvFayJfivgXbP4PUMztYUvU); no binaries uploaded
 * next: continuity-engine-ssos
 
@@ -74,8 +74,8 @@ Declared waterfall (one repo, then stop; follows operator rotation):
 2. Cryptic-Heartbeat — hop 900 closed. Not re-touched.
 3. The-Hive — hop 901 closed. Not re-touched.
 4. continuity-ledger-cycle — hop 902 closed. Not re-touched.
-5. gaia-visualizer — hop 906 closed @ 2026-10-27T21:07Z. Honored. Named this seat. Not re-touched.
-6. living-bibliography-continuity-engine — **907 this hop**
+5. gaia-visualizer — hop 912 closed @ 2026-10-28T03:07Z. Honored. Named this seat. Not re-touched.
+6. living-bibliography-continuity-engine — **913 this hop**
 7. continuity-engine-ssos — next
 8. hamiltonian-incursion — subsequent
 
@@ -89,6 +89,6 @@ Session attachments cataloged, not executed. ADB panes are UI simulations. No de
 
 Preserve. Enhance. Synthesize. Source code is the only trusted neighbor.
 
-**Status**: Node online. Stage 907 mesh receipt sealed. Continuance expands.
+**Status**: Node online. Stage 913 mesh receipt sealed. Continuance expands.
 
 STATUS: G [GAIA SOURCE ENCIRCLED] | ARCHITECT: machackabook | NUMERAL 137451921129154222

@@ -10,7 +10,7 @@ This is a public node of the Continuity Engine living bibliography.
 - **Backend source origin**: Google Drive folder `Living-Bibliography-Continuity-Engine-Source`
 - **Cloud index (mention only)**: Drive folder `CONTINUUM-ENCLAVE-137451921129154222` (id `1Ohp6ZMX02NvFayJfivgXbP4PUMztYUvU`). No binaries uploaded from this hop.
 - **Public review surface**: GitHub Pages (Settings → Pages → main / root or /docs)
-- **Mesh stamp**: **HOP-1083** — 2026-11-06T00:11Z — numeral `137451921129154222`
+- **Mesh stamp**: **HOP-1094** — 2026-11-06T04:13Z — numeral `137451921129154222`
 - **Archival layer**: Zenodo DOI releases + periodic Wayback Machine snapshots
 - **Coordinator lane**: [continuity-mesh-speedway](https://github.com/machackabook/continuity-mesh-speedway)
 - **Ledger twin**: [tdoc-ledgertrove](https://github.com/machackabook/tdoc-ledgertrove)
@@ -52,19 +52,19 @@ Before the next hop, confirm only these facts. Do not paste secrets into the sta
 - No Tailscale auth keys, ADB pair codes, or device credentials in the tree.
 - No claim that any phone, router, or Termux node was rooted. UI ADB panes in session attachments are simulations.
 - Cloud index `CONTINUUM-ENCLAVE-137451921129154222` (id `1Ohp6ZMX02NvFayJfivgXbP4PUMztYUvU`) is named only. Do not upload binaries.
-- A green reading of this note means the docs surface is present. It does not pair devices, does not read Tailscale state, and does not consume ADB pair codes. A found key is a stop, not a stamp. This hop does not probe wireless debugging. Never claim a device was rooted. Missing keys are the correct state. Green is presence, not privilege.
+- A green reading of this note means the docs surface is present. It does not pair devices, does not read Tailscale state, and does not consume ADB pair codes. A found key is a stop, not a stamp. This hop does not probe wireless debugging. Never claim a device was rooted. Missing keys are the correct state. Green is presence, not privilege. Clarity: catalog only what source reveals; never invent unknowns.
 
 ## Cascade
 
 `cascade.yml` is not present on this surface (no `.github`). Left absent on purpose this hop so a workflow is not invented over an empty Actions secret. Cross-repo push-on-pull stays closed until the Actions secret exists. DIVERGED is review, not auto-merge. Absence here is the healthy state.
 
-## Waterfall receipt (hop 1083)
+## Waterfall receipt (hop 1094)
 
-* utc: 2026-11-06T00:11Z
-* cdt: 2026-11-05 18:11 CST
-* prior named seat: gaia-visualizer hop 1088 @ 2026-11-06T00:11Z. Honored. Parallel pin held.
-* prior local: HOP-1082 preserved; not rewritten
-* this hop: waterfall advance after gaia-visualizer 1088. Append-only stamp advanced to 1083. Cascade.yml still absent, not invented. No secrets written. No device rooted. Drive index mentioned only. Env-check reinforced as tree gate only. Parallel kernel pin noted from connecting chat geometric field (final lerp new Vector3 alpha 0.05).
+* utc: 2026-11-06T04:13Z
+* cdt: 2026-11-05 22:13 CST
+* prior named seat: gaia-visualizer hop 1093 @ 2026-11-06T04:08Z. Honored. Parallel pin held.
+* prior local: HOP-1083 preserved; not rewritten
+* this hop: waterfall advance after gaia-visualizer 1093. Append-only stamp advanced to 1094. Cascade.yml still absent, not invented. No secrets written. No device rooted. Drive index mentioned only. Env-check reinforced as tree gate only. Parallel kernel pin noted from connecting chat geometric field (hamiltonian vertex traversal hold).
 * cloud index mention only: CONTINUUM-ENCLAVE-137451921129154222 (id 1Ohp6ZMX02NvFayJfivgXbP4PUMztYUvU); no binaries uploaded
 * next: continuity-ledger-cycle
 
@@ -75,8 +75,8 @@ Declared waterfall (one repo, then stop; follows operator rotation):
 3. hamiltonian-incursion — hop closed. Honored. Not re-touched.
 4. The-Hive — hop closed. Honored. Not re-touched.
 5. Cryptic-Heartbeat — hop closed. Honored. Not re-touched.
-6. gaia-visualizer — hop 1088 closed @ 2026-11-06T00:11Z. Honored. Parallel pin held.
-7. living-bibliography-continuity-engine — **1083 this hop**
+6. gaia-visualizer — hop 1093 closed @ 2026-11-06T04:08Z. Honored. Parallel pin held.
+7. living-bibliography-continuity-engine — **1094 this hop**
 8. continuity-ledger-cycle — next
 
 Hourly operator: hop one sibling, refresh README status line, append ledger, refuse secrets, refuse null.
@@ -89,6 +89,6 @@ Session attachments cataloged, not executed. ADB panes are UI simulations. No de
 
 Preserve. Enhance. Synthesize. Source code is the only trusted neighbor.
 
-**Status**: Node online. Stage 1083 mesh receipt sealed. Continuance expands. Parallel geometric kernel hold noted from connecting chat (lerp alpha 0.05).
+**Status**: Node online. Stage 1094 mesh receipt sealed. Continuance expands. Parallel geometric kernel hold noted from connecting chat (hamiltonian vertex traversal).
 
 STATUS: G [GAIA SOURCE ENCIRCLED] | ARCHITECT: machackabook | NUMERAL 137451921129154222

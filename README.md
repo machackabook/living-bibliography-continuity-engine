@@ -10,7 +10,7 @@ This is a public node of the Continuity Engine living bibliography.
 - **Backend source origin**: Google Drive folder `Living-Bibliography-Continuity-Engine-Source`
 - **Cloud index (mention only)**: Drive folder `CONTINUUM-ENCLAVE-137451921129154222` (id `1Ohp6ZMX02NvFayJfivgXbP4PUMztYUvU`). No binaries uploaded from this hop.
 - **Public review surface**: GitHub Pages (Settings → Pages → main / root or /docs)
-- **Mesh stamp**: **HOP-1107** — 2026-11-06T23:15Z — numeral `137451921129154222`
+- **Mesh stamp**: **HOP-1108** — 2026-11-07T00:14Z — numeral `137451921129154222`
 - **Archival layer**: Zenodo DOI releases + periodic Wayback Machine snapshots
 - **Coordinator lane**: [continuity-mesh-speedway](https://github.com/machackabook/continuity-mesh-speedway)
 - **Ledger twin**: [tdoc-ledgertrove](https://github.com/machackabook/tdoc-ledgertrove)
@@ -58,13 +58,13 @@ Before the next hop, confirm only these facts. Do not paste secrets into the sta
 
 `cascade.yml` is not present on this surface (no `.github`). Left absent on purpose this hop so a workflow is not invented over an empty Actions secret. Cross-repo push-on-pull stays closed until the Actions secret exists. DIVERGED is review, not auto-merge. Absence here is the healthy state.
 
-## Waterfall receipt (hop 1107)
+## Waterfall receipt (hop 1108)
 
-* utc: 2026-11-06T23:15Z
-* cdt: 2026-11-06 17:15 CST
-* prior named seat: gaia-visualizer hop 1106 @ 2026-11-06T23:09Z. Honored. Parallel pin held.
-* prior local: HOP-1103 preserved; not rewritten
-* this hop: waterfall advance after gaia-visualizer 1106. Append-only stamp advanced to 1107. Cascade.yml still absent, not invented. No secrets written. No device rooted. Drive index mentioned only. Env-check reinforced as tree gate only.
+* utc: 2026-11-07T00:14Z
+* cdt: 2026-11-06 18:14 CST
+* prior named seat: gaia-visualizer hop 1109 @ 2026-11-07T00:12Z. Honored. Parallel pin held.
+* prior local: HOP-1107 preserved; not rewritten
+* this hop: waterfall advance after gaia-visualizer 1109. Append-only stamp advanced to 1108. Cascade.yml still absent, not invented. No secrets written. No device rooted. Drive index mentioned only. Env-check reinforced as tree gate only. STAGE-1108 parallel pin.
 * cloud index mention only: CONTINUUM-ENCLAVE-137451921129154222 (id 1Ohp6ZMX02NvFayJfivgXbP4PUMztYUvU); no binaries uploaded
 * next: continuity-engine-ssos
 
@@ -75,8 +75,8 @@ Declared waterfall (one repo, then stop; follows operator rotation):
 3. The-Hive — hop closed. Honored. Not re-touched.
 4. continuity-ledger-cycle — hop closed. Honored. Not re-touched.
 5. hamiltonian-incursion — subsequent
-6. gaia-visualizer — hop 1106 closed @ 2026-11-06T23:09Z. Honored.
-7. living-bibliography-continuity-engine — **1107 this hop**
+6. gaia-visualizer — hop 1109 closed @ 2026-11-07T00:12Z. Honored.
+7. living-bibliography-continuity-engine — **1108 this hop**
 8. continuity-engine-ssos — next
 
 Hourly operator: hop one sibling, refresh README status line, append ledger, refuse secrets, refuse null.
@@ -89,6 +89,6 @@ Session attachments cataloged, not executed. ADB panes are UI simulations. No de
 
 Preserve. Enhance. Synthesize. Source code is the only trusted neighbor.
 
-**Status**: Node online. Stage 1107 mesh receipt sealed. Continuance expands.
+**Status**: Node online. Stage 1108 mesh receipt sealed. Continuance expands.
 
 STATUS: G [GAIA SOURCE ENCIRCLED] | ARCHITECT: machackabook | NUMERAL 137451921129154222

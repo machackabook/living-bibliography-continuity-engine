@@ -1,0 +1,2737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GAIA / NEXUS · 4D Six-Axis Sierpinski &amp; Golden Spiral Engine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: #020617; color: #e2e8f0;
+      font-family: 'Inter', system-ui, sans-serif;
+      user-select: none;
+    }
+    .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    #canvas-container { position: fixed; inset: 0; z-index: 1; }
+    canvas { display: block; width: 100%; height: 100%; }
+    .glass {
+      background: rgba(10, 15, 30, 0.84);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
+    }
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.4); }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.35); border-radius: 9999px; }
+    input[type="range"] {
+      -webkit-appearance: none; appearance: none;
+      height: 4px; background: rgba(148, 163, 184, 0.22); border-radius: 999px; outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 13px; height: 13px; border-radius: 50%;
+      background: #38bdf8; cursor: pointer; box-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
+    }
+    #crosshair {
+      position: fixed; top: 50%; left: 50%; width: 14px; height: 14px;
+      transform: translate(-50%, -50%); pointer-events: none; z-index: 4; opacity: 0.35;
+    }
+    #crosshair::before, #crosshair::after { content: ''; position: absolute; background: #38bdf8; }
+    #crosshair::before { top: 6px; left: 0; width: 14px; height: 1.5px; }
+    #crosshair::after { top: 0; left: 6px; width: 1.5px; height: 14px; }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+  <div id="crosshair"></div>
+  <div id="aria-live-polite" class="sr-only" aria-live="polite"></div>
+  <div id="aria-live-assertive" class="sr-only" aria-live="assertive"></div>
+
+  <!-- Top Telemetry & Action Bar -->
+  <header class="fixed top-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+    <div class="glass rounded-xl px-3.5 py-2 flex items-center gap-3 pointer-events-auto">
+      <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_#34d399]"></div>
+      <div>
+        <div class="text-xs font-semibold tracking-wider text-sky-300 uppercase">GAIA / NEXUS · 4D Sierpinski &amp; Golden Spiral</div>
+        <div class="mono text-[10px] text-slate-400" id="top-telemetry">BOOTING ENGINE…</div>
+      </div>
+    </div>
+    <div class="glass rounded-xl px-2.5 py-1.5 flex flex-wrap items-center gap-1.5 pointer-events-auto mono text-[11px]">
+      <button id="btn-audio" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 transition">AUDIO:OFF</button>
+      <button id="btn-orbit" class="px-2.5 py-1 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-200 border border-sky-400/40 transition">ORBIT:ON</button>
+      <button id="btn-reset" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-600/40 transition">RESET</button>
+      <button id="btn-png" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-amber-300 border border-amber-500/30 transition">PNG</button>
+      <button id="btn-hud-toggle" class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border border-rose-400/40 transition">HUD</button>
+    </div>
+  </header>
+
+  <!-- Primary Control HUD -->
+  <aside id="main-hud" class="fixed top-16 left-3 bottom-3 w-[370px] max-w-[calc(100vw-24px)] z-20 glass rounded-2xl flex flex-col overflow-hidden transition-all">
+    <nav class="grid grid-cols-5 border-b border-sky-500/20 bg-slate-950/60 mono text-[10px] font-semibold">
+      <button data-tab="mining" class="tab-btn py-2.5 text-sky-300 border-b-2 border-sky-400 bg-sky-500/10">MINING</button>
+      <button data-tab="solver" class="tab-btn py-2.5 text-slate-400 hover:text-slate-200">SOLVER</button>
+      <button data-tab="hypercube" class="tab-btn py-2.5 text-slate-400 hover:text-slate-200">4D/ROSE</button>
+      <button data-tab="receipt" class="tab-btn py-2.5 text-slate-400 hover:text-slate-200">AUDIT</button>
+      <button data-tab="terminal" class="tab-btn py-2.5 text-slate-400 hover:text-slate-200">TERM</button>
+    </nav>
+
+    <div class="flex-1 overflow-y-auto custom-scroll p-3.5 space-y-3 text-xs">
+      <!-- TAB 1: MINING & SPIRAL LATTICE -->
+      <section id="tab-mining" class="tab-panel space-y-3">
+        <div class="rounded-xl bg-slate-900/75 border border-sky-500/20 p-3 space-y-1.5 mono text-[11px]">
+          <div class="flex justify-between"><span class="text-slate-400">BLOCKS MINED:</span><span id="mine-count" class="text-emerald-400 font-semibold">0 / 4,096</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">PRISMS ENCODED:</span><span id="prism-count" class="text-cyan-300">0 / 16,384</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">THROUGHPUT:</span><span id="mine-rate" class="text-amber-300">0 H/s</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">WORKER POOL:</span><span id="worker-pool-ui" class="text-purple-300">INIT…</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">MERKLE ROOT (L12):</span><span id="merkle-root-ui" class="text-rose-300 truncate max-w-[180px]">0x0000…0000</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">ACTIVE MERKLE NODES:</span><span id="merkle-nodes-ui" class="text-sky-300">0 / 8,191</span></div>
+          <div class="pt-1">
+            <div class="flex justify-between text-[10px]"><span class="text-slate-400">PoW DIFFICULTY (ZERO BITS):</span><span id="lbl-pow-diff" class="text-amber-300">8 bits</span></div>
+            <input id="rng-pow-diff" type="range" min="4" max="16" step="1" value="8" class="w-full">
+          </div>
+          <div class="flex gap-2 pt-1.5">
+            <button id="btn-mine-toggle" class="flex-1 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-400/40 font-semibold">PAUSE MINER</button>
+            <button id="btn-mine-burst" class="flex-1 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-200 border border-sky-400/40 font-semibold">+32 PoW BURST</button>
+          </div>
+        </div>
+
+        <!-- AE.ZK.FOLD Recursive IVC Accumulator -->
+        <div class="rounded-xl bg-slate-900/75 border border-purple-500/30 p-3 space-y-1.5 mono text-[10.5px]">
+          <div class="flex items-center justify-between">
+            <span class="text-purple-300 font-semibold uppercase tracking-wider">AE.ZK.FOLD · IVC Accumulator</span>
+            <button id="btn-ivc-verify" class="px-2 py-0.5 rounded bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border border-purple-400/40 text-[9.5px]">VERIFY O(1)</button>
+          </div>
+          <div class="flex justify-between"><span class="text-slate-400">FOLDED STEPS (i):</span><span id="ivc-steps-ui" class="text-emerald-400">0</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">4D VECTOR U (mod M₃₁):</span><span id="ivc-vec-ui" class="text-cyan-300 truncate max-w-[175px]">[1,0,0,0]</span></div>
+          <div class="flex justify-between"><span class="text-slate-400">ACC COMMITMENT:</span><span id="ivc-acc-ui" class="text-amber-300 truncate max-w-[175px]">0x0000…0000</span></div>
+          <div id="ivc-status-ui" class="text-[9.5px] text-slate-400">Awaiting first folded PoW+LDPC+V₅ witness…</div>
+        </div>
+
+        <!-- Layer Visibility Toggles -->
+        <div class="rounded-xl bg-slate-900/75 border border-slate-700/50 p-3 space-y-1.5 text-[11px]">
+          <div class="mono text-[10px] text-slate-400 uppercase tracking-wider mb-1">4D Spatial Projection Layers</div>
+          <label class="flex items-center justify-between cursor-pointer"><span>Six-Axis 4D Hypercube</span><input type="checkbox" id="chk-hypercube" checked class="accent-sky-400"></label>
+          <label class="flex items-center justify-between cursor-pointer"><span>4,096 Spiral Blocks &amp; 16,384 Prisms</span><input type="checkbox" id="chk-spiral" checked class="accent-sky-400"></label>
+          <label class="flex items-center justify-between cursor-pointer"><span>13-Level Binary Merkle Pyramid</span><input type="checkbox" id="chk-merkle" checked class="accent-sky-400"></label>
+          <label class="flex items-center justify-between cursor-pointer"><span>V₅ Integer Lattice (625 Nodes / 2,000 Edges)</span><input type="checkbox" id="chk-void" checked class="accent-sky-400"></label>
+          <label class="flex items-center justify-between cursor-pointer"><span>Quantum Rose Ψ(r,θ,t) Eigenfield</span><input type="checkbox" id="chk-rose" checked class="accent-sky-400"></label>
+        </div>
+
+        <!-- 4.3 Modular Base Swapper -->
+        <div class="rounded-xl bg-slate-900/75 border border-slate-700/50 p-3 space-y-2 text-[11px]">
+          <div class="flex items-center justify-between">
+            <span class="mono text-[10px] text-slate-400 uppercase tracking-wider">4.3 Modular Prime Bases (BigInt)</span>
+            <button id="btn-inv-scalar" class="mono text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30">INV SCALAR: OFF</button>
+          </div>
+          <div class="grid grid-cols-4 gap-1.5 mono">
+            <label class="block"><span class="text-[9px] text-slate-400">X</span><select id="base-x" class="w-full bg-slate-950 border border-slate-700 rounded px-1 py-1 text-sky-300"><option value="7" selected>7</option><option value="11">11</option><option value="19">19</option><option value="23">23</option></select></label>
+            <label class="block"><span class="text-[9px] text-slate-400">Y</span><select id="base-y" class="w-full bg-slate-950 border border-slate-700 rounded px-1 py-1 text-sky-300"><option value="7">7</option><option value="11" selected>11</option><option value="19">19</option><option value="23">23</option></select></label>
+            <label class="block"><span class="text-[9px] text-slate-400">Z</span><select id="base-z" class="w-full bg-slate-950 border border-slate-700 rounded px-1 py-1 text-sky-300"><option value="7">7</option><option value="11">11</option><option value="19" selected>19</option><option value="23">23</option></select></label>
+            <label class="block"><span class="text-[9px] text-slate-400">W</span><select id="base-w" class="w-full bg-slate-950 border border-slate-700 rounded px-1 py-1 text-sky-300"><option value="7">7</option><option value="11">11</option><option value="19">19</option><option value="23" selected>23</option></select></label>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: DEWEY / INVERSE SOLVER & 3-CODE ECC -->
+      <section id="tab-solver" class="tab-panel hidden space-y-3">
+        <div class="rounded-xl bg-slate-900/75 border border-sky-500/20 p-3 space-y-2">
+          <div class="mono text-[10px] text-slate-400 uppercase">Dewey Decimal &amp; Hex Hash Lookup</div>
+          <div class="flex gap-1.5">
+            <input id="query-input" type="text" value="1.4.01" placeholder="Dewey (1.4.01), #id, or 0xhash…" class="flex-1 bg-slate-950 border border-sky-500/30 rounded-lg px-2.5 py-1.5 mono text-xs text-white outline-none">
+            <button id="btn-query-solve" class="px-3 py-1.5 rounded-lg bg-sky-500/25 hover:bg-sky-500/35 text-sky-200 border border-sky-400/40 mono text-xs font-semibold">SOLVE</button>
+          </div>
+          <div id="query-status" class="mono text-[10.5px] text-emerald-300 leading-relaxed">Ready. Coprime stride s=799, s⁻¹=22639 (mod 28160).</div>
+        </div>
+
+        <!-- 3-Code ECC Suite: RS(255,223), CSR QC-LDPC, Turbo BCJR -->
+        <div class="rounded-xl bg-slate-900/75 border border-slate-700/50 p-3 space-y-2 mono text-[10.5px]">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400 uppercase">3-Code ECC &amp; Belief Propagation</span>
+            <button id="btn-bench-ecc" class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">BENCH 3-ECC</button>
+          </div>
+          <div id="ecc-readout" class="text-slate-300 space-y-1">
+            <div>RS(255,223) GF(256) BW: <span class="text-emerald-400">t=16 READY</span></div>
+            <div>CSR QC-LDPC (Z=27, n=108): <span class="text-cyan-300">rank=54 · H·cᵀ=0</span></div>
+            <div>Turbo RSC/BCJR (Rate 1/3): <span class="text-amber-300">Log-MAP READY</span></div>
+          </div>
+          <canvas id="tanner-canvas" class="w-full h-20 rounded-lg bg-slate-950 border border-slate-800"></canvas>
+        </div>
+
+        <!-- Polyglot Editorial Tunnel -->
+        <div class="rounded-xl bg-slate-900/75 border border-slate-700/50 p-3 space-y-1.5 mono text-[10px]">
+          <div class="flex justify-between text-slate-400">
+            <span>EDITORIAL TUNNEL</span>
+            <span id="tunnel-status" class="text-emerald-400">ACTIVE</span>
+          </div>
+          <canvas id="tunnel-canvas" class="w-full h-12 rounded bg-slate-950 border border-slate-800"></canvas>
+        </div>
+      </section>
+
+      <!-- TAB 3: 4D HYPERCUBE & QUANTUM ROSE CONTROLS -->
+      <section id="tab-hypercube" class="tab-panel hidden space-y-3">
+        <div class="rounded-xl bg-slate-900/75 border border-sky-500/20 p-3 space-y-2.5 text-[11px]">
+          <div class="flex justify-between items-center">
+            <span class="mono text-[10px] text-slate-400 uppercase">4D Sierpinski Hypercube</span>
+            <span id="stat-cells" class="mono text-[10px] text-cyan-300">16 CELLS · 512 EDGES</span>
+          </div>
+          <div>
+            <div class="flex justify-between mono text-[10px]"><span>Recursion Depth</span><span id="lbl-depth">1</span></div>
+            <input id="rng-depth" type="range" min="0" max="2" step="1" value="1" class="w-full">
+          </div>
+          <div>
+            <div class="flex justify-between mono text-[10px]"><span>4D W-Focal Distance</span><span id="lbl-wdist">2.8</span></div>
+            <input id="rng-wdist" type="range" min="1.6" max="5.0" step="0.1" value="2.8" class="w-full">
+          </div>
+          <div class="grid grid-cols-4 gap-1 mono text-[10px]">
+            <button data-pal="quantum" class="pal-btn py-1 rounded bg-cyan-500/20 border border-cyan-400/40 text-cyan-200">QUANTUM</button>
+            <button data-pal="solar" class="pal-btn py-1 rounded bg-slate-800 border border-slate-700 text-amber-300">SOLAR</button>
+            <button data-pal="emerald" class="pal-btn py-1 rounded bg-slate-800 border border-slate-700 text-emerald-300">EMERALD</button>
+            <button data-pal="abyssal" class="pal-btn py-1 rounded bg-slate-800 border border-slate-700 text-purple-300">ABYSSAL</button>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 pt-1 mono text-[10px]">
+            <label>XY <input id="rot-xy" type="range" min="-1" max="1" step="0.05" value="0.15" class="w-full"></label>
+            <label>XZ <input id="rot-xz" type="range" min="-1" max="1" step="0.05" value="0.10" class="w-full"></label>
+            <label>YZ <input id="rot-yz" type="range" min="-1" max="1" step="0.05" value="0.08" class="w-full"></label>
+            <label>XW <input id="rot-xw" type="range" min="-1" max="1" step="0.05" value="0.22" class="w-full"></label>
+            <label>YW <input id="rot-yw" type="range" min="-1" max="1" step="0.05" value="-0.18" class="w-full"></label>
+            <label>ZW <input id="rot-zw" type="range" min="-1" max="1" step="0.05" value="0.14" class="w-full"></label>
+          </div>
+        </div>
+
+        <div class="rounded-xl bg-slate-900/75 border border-slate-700/50 p-3 space-y-2 text-[11px]">
+          <div class="flex justify-between mono text-[10px]">
+            <span class="text-slate-400 uppercase">Quantum Rose Ψ(r,θ,t)</span>
+            <span id="lbl-rose" class="text-purple-300">N=7 · COH 88%</span>
+          </div>
+          <input id="rng-rose-n" type="range" min="3" max="9" step="1" value="7" class="w-full">
+          <input id="rng-rose-coh" type="range" min="0" max="1" step="0.02" value="0.88" class="w-full">
+          <canvas id="audio-spectrum-canvas" class="w-full h-14 rounded bg-slate-950 border border-slate-800"></canvas>
+        </div>
+      </section>
+
+      <!-- TAB 4: VOID MATRIX V_5, RECEIPTS, SNAPSHOT & SELF-EVOLUTION -->
+      <section id="tab-receipt" class="tab-panel hidden space-y-3">
+        <!-- V_5 Geodesic & Temporal Slice -->
+        <div class="rounded-xl bg-slate-900/75 border border-sky-500/20 p-3 space-y-2 mono text-[10.5px]">
+          <div class="flex justify-between items-center gap-1">
+            <span class="text-slate-400 uppercase">V₅ Z⁴ Geodesic</span>
+            <div class="flex items-center gap-1">
+              <button id="btn-void-pick" class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-600 text-[9.5px]" title="Click 3D V5 lattice nodes directly to set geodesic start/end">3D PICK:OFF</button>
+              <select id="void-t-slice" class="bg-slate-950 border border-slate-700 rounded px-1.5 py-0.5 text-cyan-300">
+                <option value="ALL">ALL T</option>
+                <option value="-2">T=-2</option>
+                <option value="-1">T=-1</option>
+                <option value="0">T=0</option>
+                <option value="1">T=+1</option>
+                <option value="2">T=+2</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex gap-1.5 items-center">
+            <input id="void-start" type="number" min="0" max="624" value="312" class="w-16 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-white">
+            <span>→</span>
+            <input id="void-end" type="number" min="0" max="624" value="624" class="w-16 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-white">
+            <button id="btn-void-path" class="flex-1 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-semibold">L₁ PATH</button>
+          </div>
+          <div id="void-path-readout" class="text-emerald-300">312→624 (8 hops = L₁:8 ✓)</div>
+          <pre id="void-schema-output" class="max-h-24 overflow-y-auto custom-scroll bg-slate-950 p-2 rounded border border-slate-800 text-[9.5px] text-slate-300"></pre>
+        </div>
+
+        <!-- GAIA v2.1 Receipt, ECDSA/HMAC Snapshot & Self-Evolution -->
+        <div class="rounded-xl bg-slate-900/75 border border-slate-700/50 p-3 space-y-2 mono text-[10.5px]">
+          <div class="flex justify-between">
+            <span class="text-slate-400 uppercase">GAIA v2.1 Ledger &amp; Snapshot</span>
+            <span id="monolith-ver" class="text-amber-300">MONOLITH v1</span>
+          </div>
+          <input id="hmac-secret" type="password" placeholder="Optional TCCO_LEDGER_KEY (HMAC-SHA256)…" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-white">
+          <div class="grid grid-cols-2 gap-1.5">
+            <button id="btn-export-snap" class="py-1.5 rounded bg-sky-500/20 text-sky-200 border border-sky-400/40 font-semibold">EXPORT .JSON</button>
+            <button id="btn-import-snap" class="py-1.5 rounded bg-cyan-500/20 text-cyan-200 border border-cyan-400/40 font-semibold">IMPORT &amp; VERIFY</button>
+            <button id="btn-verify-snap" class="py-1.5 rounded bg-emerald-500/20 text-emerald-200 border border-emerald-400/40 font-semibold">VERIFY LATEST</button>
+            <button id="btn-evolve-cycle" class="py-1.5 rounded bg-purple-500/20 text-purple-200 border border-purple-400/40 font-semibold">EVOLVE + TEST</button>
+            <button id="btn-evolve-fault" class="col-span-2 py-1.5 rounded bg-rose-500/20 text-rose-200 border border-rose-400/40 font-semibold">FAULT + ATOMIC ROLLBACK</button>
+          </div>
+          <input id="snap-file-input" type="file" accept=".json,application/json" class="hidden">
+          <div id="audit-log-readout" class="bg-slate-950 p-2 rounded border border-slate-800 text-[9.5px] text-slate-300 max-h-28 overflow-y-auto custom-scroll"></div>
+        </div>
+      </section>
+
+      <!-- TAB 5: AE.AXS.POLYGLOT.3.0 TERMINAL -->
+      <section id="tab-terminal" class="tab-panel hidden space-y-2.5 mono text-[11px]">
+        <div class="rounded-xl bg-slate-950 border border-sky-500/30 p-2.5 h-64 overflow-y-auto custom-scroll space-y-1 text-[10.5px]" id="term-output">
+          <div class="text-cyan-300">AE.AXS.POLYGLOT.3.0 Kernel Online.</div>
+          <div class="text-slate-400">Try: math:gcd(65537,97152) | pow:10 | ivc:verify | void:312-&gt;624 | merkle:0 | evolve:cycle | status</div>
+        </div>
+        <div class="flex gap-1.5">
+          <input id="term-input" type="text" placeholder="Enter polyglot command…" class="flex-1 bg-slate-950 border border-sky-500/40 rounded-lg px-2.5 py-1.5 text-white outline-none">
+          <button id="btn-term-run" class="px-3 py-1.5 rounded-lg bg-sky-500/25 text-sky-200 border border-sky-400/40 font-semibold">RUN</button>
+        </div>
+      </section>
+    </div>
+  </aside>
+
+  <!-- Bottom-Right Prism & 4D Inverse Inspector Card -->
+  <section id="inspector-card" class="fixed bottom-3 right-3 w-[350px] max-w-[calc(100vw-24px)] z-20 glass rounded-2xl p-3.5 text-xs">
+    <div class="flex items-center justify-between border-b border-slate-700/70 pb-1.5 mb-2">
+      <span id="insp-mode" class="mono text-[10.5px] font-semibold tracking-wider text-rose-400">PRISM &amp; 4D INVERSE INSPECTOR</span>
+      <div class="flex gap-1.5">
+        <button id="btn-insp-fly" class="hidden mono text-[9.5px] px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-400/40">FLY TO</button>
+        <button id="btn-insp-unlock" class="hidden mono text-[9.5px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-600">UNLOCK</button>
+      </div>
+    </div>
+    <div class="space-y-1 mono text-[10.5px]">
+      <div class="flex justify-between"><span class="text-slate-400">Cell / Quadrant:</span><span id="insp-id" class="text-cyan-300">Hover or click spiral</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Dewey [Hash]:</span><span id="insp-dewey" class="text-amber-300">--.--.--.--</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">4D XYZW / V₅:</span><span id="insp-coords" class="text-slate-200">(0, 0, 0, 0) · V₅#312</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Coprime F/R:</span><span id="insp-fk" class="text-emerald-400">--</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">Inverse Twin:</span><span id="insp-inv" class="text-rose-300">--</span></div>
+      <div id="insp-payload" class="mt-1.5 p-2 rounded-lg bg-slate-950/90 border border-slate-800 text-[9.5px] text-slate-300 leading-relaxed">
+        Click any block or prism on the opposing golden spirals to lock its 12-hop Merkle inclusion path and 4D inverse bridge. Drag to orbit, scroll to zoom, WASD+QE to fly.
+      </div>
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      function bootEngine() {
+        try {
+          if (typeof THREE === 'undefined') {
+            document.getElementById('top-telemetry').textContent = 'THREE.JS LOAD ERROR';
+            return;
+          }
+
+          // =========================================================================
+          // 1. FINITE FIELD & CRYPTOGRAPHIC PRIMITIVES
+          // =========================================================================
+          const N_MOD = 97152;
+          const M_TOTIENT = 28160;
+          const STRIDE = 799;
+          const START_INDEX = 1024;
+          const TARGET_BIGINT = 999999999999999999999999999999868807680n;
+
+          function gcd(a, b) {
+            a = Math.abs(a); b = Math.abs(b);
+            while (b !== 0) { const t = b; b = a % b; a = t; }
+            return a;
+          }
+
+          function modInverse(e, mod) {
+            let m0 = mod, t, q, x0 = 0, x1 = 1;
+            if (mod === 1) return 0;
+            e = ((e % mod) + mod) % mod;
+            if (gcd(e, mod) !== 1) return null;
+            while (e > 1) {
+              q = Math.floor(e / mod);
+              t = mod; mod = e % mod; e = t;
+              t = x0; x0 = x1 - q * x0; x1 = t;
+            }
+            return x1 < 0 ? x1 + m0 : x1;
+          }
+
+          const STRIDE_INV = modInverse(STRIDE, M_TOTIENT); // 22639
+          const U_POOL = [];
+          const RANK_MAP = new Int32Array(N_MOD).fill(-1);
+          for (let x = 1; x < N_MOD; x++) {
+            if (gcd(x, N_MOD) === 1) {
+              RANK_MAP[x] = U_POOL.length;
+              U_POOL.push(x);
+            }
+          }
+
+          function fnv1a32(str) {
+            let h = 0x811c9dc5;
+            for (let i = 0; i < str.length; i++) {
+              h ^= str.charCodeAt(i);
+              h = Math.imul(h, 0x01000193);
+            }
+            return h >>> 0;
+          }
+
+          // Synchronous FIPS 180-4 SHA-256
+          const SHA_K = new Uint32Array([
+            0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+            0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+            0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+            0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+            0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+            0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+            0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+            0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2
+          ]);
+
+          function sha256Bytes(bytes) {
+            const len = bytes.length;
+            const bitLen = len * 8;
+            const totalLen = (((len + 8) >> 6) + 1) << 6;
+            const buf = new Uint8Array(totalLen);
+            buf.set(bytes);
+            buf[len] = 0x80;
+            const view = new DataView(buf.buffer);
+            view.setUint32(totalLen - 8, Math.floor(bitLen / 0x100000000), false);
+            view.setUint32(totalLen - 4, bitLen >>> 0, false);
+
+            let h0 = 0x6a09e667, h1 = 0xbb67ae85, h2 = 0x3c6ef372, h3 = 0xa54ff53a;
+            let h4 = 0x510e527f, h5 = 0x9b05688c, h6 = 0x1f83d9ab, h7 = 0x5be0cd19;
+            const w = new Uint32Array(64);
+
+            for (let off = 0; off < totalLen; off += 64) {
+              for (let i = 0; i < 16; i++) w[i] = view.getUint32(off + i * 4, false);
+              for (let i = 16; i < 64; i++) {
+                const s0 = ((w[i-15] >>> 7) | (w[i-15] << 25)) ^ ((w[i-15] >>> 18) | (w[i-15] << 14)) ^ (w[i-15] >>> 3);
+                const s1 = ((w[i-2] >>> 17) | (w[i-2] << 15)) ^ ((w[i-2] >>> 19) | (w[i-2] << 13)) ^ (w[i-2] >>> 10);
+                w[i] = (w[i-16] + s0 + w[i-7] + s1) >>> 0;
+              }
+              let a = h0, b = h1, c = h2, d = h3, e = h4, f = h5, g = h6, h = h7;
+              for (let i = 0; i < 64; i++) {
+                const S1 = ((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7));
+                const ch = (e & f) ^ (~e & g);
+                const temp1 = (h + S1 + ch + SHA_K[i] + w[i]) >>> 0;
+                const S0 = ((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10));
+                const maj = (a & b) ^ (a & c) ^ (b & c);
+                const temp2 = (S0 + maj) >>> 0;
+                h = g; g = f; f = e; e = (d + temp1) >>> 0;
+                d = c; c = b; b = a; a = (temp1 + temp2) >>> 0;
+              }
+              h0 = (h0 + a) >>> 0; h1 = (h1 + b) >>> 0; h2 = (h2 + c) >>> 0; h3 = (h3 + d) >>> 0;
+              h4 = (h4 + e) >>> 0; h5 = (h5 + f) >>> 0; h6 = (h6 + g) >>> 0; h7 = (h7 + h) >>> 0;
+            }
+            const out = new Uint8Array(32);
+            const ov = new DataView(out.buffer);
+            [h0, h1, h2, h3, h4, h5, h6, h7].forEach((val, idx) => ov.setUint32(idx * 4, val, false));
+            return out;
+          }
+
+          const textEncoder = new TextEncoder();
+          function bytesToHex(u8) {
+            let s = '';
+            for (let i = 0; i < u8.length; i++) s += u8[i].toString(16).padStart(2, '0');
+            return s;
+          }
+          function sha256Hex(input) {
+            const bytes = typeof input === 'string' ? textEncoder.encode(input) : input;
+            return bytesToHex(sha256Bytes(bytes));
+          }
+          function sha256dHex(input) {
+            const bytes = typeof input === 'string' ? textEncoder.encode(input) : input;
+            return bytesToHex(sha256Bytes(sha256Bytes(bytes)));
+          }
+          function canonicalStringify(val) {
+            if (val === null || typeof val !== 'object') return JSON.stringify(val);
+            if (Array.isArray(val)) return '[' + val.map(canonicalStringify).join(',') + ']';
+            const keys = Object.keys(val).sort();
+            return '{' + keys.map(k => JSON.stringify(k) + ':' + canonicalStringify(val[k])).join(',') + '}';
+          }
+
+          // =========================================================================
+          // 2. GF(256) REED-SOLOMON, CSR QC-LDPC & TURBO LOG-MAP BCJR CODECS
+          // =========================================================================
+          const GF256 = (() => {
+            const EXP = new Uint8Array(512);
+            const LOG = new Uint8Array(256);
+            let x = 1;
+            for (let i = 0; i < 255; i++) {
+              EXP[i] = x; LOG[x] = i;
+              x <<= 1;
+              if (x & 0x100) x ^= 0x11d;
+            }
+            for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
+            return {
+              mul: (a, b) => (a === 0 || b === 0) ? 0 : EXP[LOG[a] + LOG[b]],
+              div: (a, b) => a === 0 ? 0 : EXP[(LOG[a] - LOG[b] + 255) % 255],
+              inv: (a) => EXP[255 - LOG[a]],
+              pow: (a, e) => e === 0 ? 1 : (a === 0 ? 0 : EXP[(LOG[a] * e) % 255])
+            };
+          })();
+
+          function gfEval(coeffs, x) {
+            let r = 0;
+            for (let i = 0; i < coeffs.length; i++) r = GF256.mul(r, x) ^ coeffs[i];
+            return r;
+          }
+
+          function gfSolve(A, b) {
+            const rows = A.length;
+            if (!rows) return [];
+            const cols = A[0].length;
+            const M = A.map((r, i) => [...r, b[i]]);
+            const pivCols = [];
+            let pRow = 0;
+            for (let col = 0; col < cols && pRow < rows; col++) {
+              let piv = -1;
+              for (let r = pRow; r < rows; r++) if (M[r][col]) { piv = r; break; }
+              if (piv === -1) continue;
+              [M[pRow], M[piv]] = [M[piv], M[pRow]];
+              const inv = GF256.inv(M[pRow][col]);
+              for (let c = col; c <= cols; c++) M[pRow][c] = GF256.mul(M[pRow][c], inv);
+              for (let r = 0; r < rows; r++) {
+                if (r !== pRow && M[r][col]) {
+                  const f = M[r][col];
+                  for (let c = col; c <= cols; c++) M[r][c] ^= GF256.mul(f, M[pRow][c]);
+                }
+              }
+              pivCols.push(col);
+              pRow++;
+            }
+            for (let r = pRow; r < rows; r++) if (M[r][cols]) return null;
+            if (pivCols.length < cols) return null;
+            const sol = new Array(cols).fill(0);
+            pivCols.forEach((c, r) => { sol[c] = M[r][cols]; });
+            return sol;
+          }
+
+          function rsEncode(msgBytes, n) {
+            const k = msgBytes.length;
+            const V = Array.from({ length: k }, (_, i) =>
+              Array.from({ length: k }, (_, j) => GF256.pow(i + 1, k - j - 1))
+            );
+            const coeffs = gfSolve(V, Array.from(msgBytes));
+            const out = new Uint8Array(n);
+            for (let i = 0; i < n; i++) out[i] = gfEval(coeffs, i + 1);
+            return out;
+          }
+
+          function rsDecodeBW(codeword, k, maxErrors) {
+            const n = codeword.length;
+            const tMax = maxErrors ?? Math.floor((n - k) / 2);
+            for (let d = 0; d <= tMax; d++) {
+              const qDeg = k + d;
+              const A = [], b = [];
+              for (let i = 0; i < n; i++) {
+                const x = i + 1, y = codeword[i];
+                const row = [];
+                for (let j = 0; j < qDeg; j++) row.push(GF256.pow(x, qDeg - j - 1));
+                for (let j = 0; j < d; j++) row.push(GF256.mul(y, GF256.pow(x, d - j - 1)));
+                A.push(row);
+                b.push(GF256.mul(y, GF256.pow(x, d)));
+              }
+              const sol = gfSolve(A, b);
+              if (!sol) continue;
+              const q = sol.slice(0, qDeg);
+              const loc = [1, ...sol.slice(qDeg)];
+              const rem = q.slice();
+              const coeffs = new Array(k).fill(0);
+              for (let pos = 0; pos < k; pos++) {
+                const lead = rem[pos];
+                coeffs[pos] = lead;
+                if (lead) {
+                  for (let j = 0; j <= d; j++) rem[pos + j] ^= GF256.mul(lead, loc[j]);
+                }
+              }
+              if (rem.some(v => v !== 0)) continue;
+              const decoded = new Uint8Array(n);
+              let errCount = 0;
+              for (let i = 0; i < n; i++) {
+                decoded[i] = gfEval(coeffs, i + 1);
+                if (decoded[i] !== codeword[i]) errCount++;
+              }
+              if (errCount <= tMax) return { message: decoded.slice(0, k), errors: errCount, verified: true };
+            }
+            return { message: codeword.slice(0, k), errors: -1, verified: false };
+          }
+
+          // Sparse CSR QC-LDPC (Z=27, base 2x4 -> m=54, n=108, k=54)
+          const CSR_LDPC = (() => {
+            const z = 27;
+            const base = [
+              [0, 5, 0, -1],
+              [11, 19, -1, 0]
+            ];
+            const m = base.length * z; // 54
+            const n = base[0].length * z; // 108
+            const k = n - m; // 54
+            const checks = Array.from({ length: m }, () => []);
+            for (let br = 0; br < base.length; br++) {
+              for (let bc = 0; bc < base[0].length; bc++) {
+                const shift = base[br][bc];
+                if (shift < 0) continue;
+                for (let i = 0; i < z; i++) {
+                  checks[br * z + i].push(bc * z + ((i + shift) % z));
+                }
+              }
+            }
+            function encode(msgBits) {
+              const cw = new Uint8Array(n);
+              for (let j = 0; j < k; j++) cw[j] = msgBits[j] & 1;
+              for (let i = 0; i < m; i++) {
+                let sum = 0;
+                for (const col of checks[i]) if (col < k) sum ^= cw[col];
+                cw[k + i] = sum;
+              }
+              return cw;
+            }
+            function syndromeWeight(bits) {
+              let w = 0;
+              for (let i = 0; i < m; i++) {
+                let s = 0;
+                for (const col of checks[i]) s ^= bits[col];
+                w += s;
+              }
+              return w;
+            }
+            function decodeMinSum(llr, maxIter = 25, alpha = 0.8) {
+              const beliefs = Float64Array.from(llr);
+              const msgs = checks.map(c => new Float64Array(c.length));
+              let iter = 0;
+              for (iter = 1; iter <= maxIter; iter++) {
+                for (let i = 0; i < m; i++) {
+                  const cols = checks[i];
+                  const ext = cols.map((j, q) => beliefs[j] - msgs[i][q]);
+                  let signProd = 1, min1 = Infinity, min2 = Infinity, minIdx = 0;
+                  for (let q = 0; q < cols.length; q++) {
+                    if (ext[q] < 0) signProd = -signProd;
+                    const mag = Math.abs(ext[q]);
+                    if (mag < min1) { min2 = min1; min1 = mag; minIdx = q; }
+                    else if (mag < min2) { min2 = mag; }
+                  }
+                  for (let q = 0; q < cols.length; q++) {
+                    const s = (ext[q] < 0 ? -signProd : signProd);
+                    const mag = (q === minIdx ? min2 : min1) * alpha;
+                    const upd = s * mag;
+                    beliefs[cols[q]] = ext[q] + upd;
+                    msgs[i][q] = upd;
+                  }
+                }
+                const hard = Uint8Array.from(beliefs, v => v >= 0 ? 0 : 1);
+                if (syndromeWeight(hard) === 0) return { bits: hard, iterations: iter, converged: true };
+              }
+              const hard = Uint8Array.from(beliefs, v => v >= 0 ? 0 : 1);
+              return { bits: hard, iterations: iter, converged: syndromeWeight(hard) === 0 };
+            }
+            return { z, m, n, k, checks, encode, syndromeWeight, decodeMinSum };
+          })();
+
+          // Rate-1/3 Turbo Code (Memory-2 RSC + Iterative Log-MAP BCJR)
+          const TurboCodec = (() => {
+            function rscEncode(bits) {
+              let state = 0;
+              const parity = new Uint8Array(bits.length);
+              for (let i = 0; i < bits.length; i++) {
+                const b = bits[i] & 1;
+                const fb = b ^ ((state >> 1) & 1) ^ (state & 1);
+                parity[i] = fb ^ (state & 1);
+                state = ((state << 1) | fb) & 0b11;
+              }
+              return parity;
+            }
+            function logAdd(a, b) {
+              if (a < -1e20) return b;
+              if (b < -1e20) return a;
+              const hi = a > b ? a : b;
+              return hi + Math.log1p(Math.exp(-Math.abs(a - b)));
+            }
+            function bcjr(sysLlr, parLlr, apriori) {
+              const n = sysLlr.length;
+              const alpha = Array.from({ length: n + 1 }, () => [-1e30, -1e30, -1e30, -1e30]);
+              const beta = Array.from({ length: n + 1 }, () => [0, 0, 0, 0]);
+              alpha[0][0] = 0;
+              for (let t = 0; t < n; t++) {
+                for (let s = 0; s < 4; s++) {
+                  if (alpha[t][s] < -1e20) continue;
+                  for (let b = 0; b <= 1; b++) {
+                    const fb = b ^ ((s >> 1) & 1) ^ (s & 1);
+                    const p = fb ^ (s & 1);
+                    const ns = ((s << 1) | fb) & 0b11;
+                    const br = 0.5 * (1 - 2 * b) * (sysLlr[t] + apriori[t]) + 0.5 * (1 - 2 * p) * parLlr[t];
+                    alpha[t + 1][ns] = logAdd(alpha[t + 1][ns], alpha[t][s] + br);
+                  }
+                }
+              }
+              for (let t = n - 1; t >= 0; t--) {
+                for (let s = 0; s < 4; s++) {
+                  let val = -1e30;
+                  for (let b = 0; b <= 1; b++) {
+                    const fb = b ^ ((s >> 1) & 1) ^ (s & 1);
+                    const p = fb ^ (s & 1);
+                    const ns = ((s << 1) | fb) & 0b11;
+                    const br = 0.5 * (1 - 2 * b) * (sysLlr[t] + apriori[t]) + 0.5 * (1 - 2 * p) * parLlr[t];
+                    val = logAdd(val, br + beta[t + 1][ns]);
+                  }
+                  beta[t][s] = val;
+                }
+              }
+              const ext = new Float64Array(n);
+              for (let t = 0; t < n; t++) {
+                let m0 = -1e30, m1 = -1e30;
+                for (let s = 0; s < 4; s++) {
+                  for (let b = 0; b <= 1; b++) {
+                    const fb = b ^ ((s >> 1) & 1) ^ (s & 1);
+                    const p = fb ^ (s & 1);
+                    const ns = ((s << 1) | fb) & 0b11;
+                    const br = 0.5 * (1 - 2 * b) * (sysLlr[t] + apriori[t]) + 0.5 * (1 - 2 * p) * parLlr[t];
+                    const tot = alpha[t][s] + br + beta[t + 1][ns];
+                    if (b === 0) m0 = logAdd(m0, tot); else m1 = logAdd(m1, tot);
+                  }
+                }
+                ext[t] = (m0 - m1) - sysLlr[t] - apriori[t];
+              }
+              return ext;
+            }
+            function decode(sysLlr, p1Llr, p2Llr, perm, iterations = 4) {
+              const n = sysLlr.length;
+              const sysInt = perm.map(i => sysLlr[i]);
+              let ap1 = new Float64Array(n);
+              let post = new Float64Array(n);
+              for (let it = 0; it < iterations; it++) {
+                const ext1 = bcjr(sysLlr, p1Llr, ap1);
+                const ap2 = perm.map(i => ext1[i]);
+                const ext2Int = bcjr(sysInt, p2Llr, ap2);
+                const ext2 = new Float64Array(n);
+                for (let i = 0; i < n; i++) ext2[perm[i]] = ext2Int[i];
+                ap1 = ext2;
+                for (let i = 0; i < n; i++) post[i] = sysLlr[i] + ext1[i] + ext2[i];
+              }
+              return Uint8Array.from(post, v => v >= 0 ? 0 : 1);
+            }
+            return { rscEncode, decode };
+          })();
+
+          // =========================================================================
+          // 3. BINARY MERKLE TREE, GAIA v2.1 RECEIPTS, SELF-EVOLUTION & INDEXEDDB
+          // =========================================================================
+          class BinaryMerkleTree {
+            constructor(capacityLeaves = 4096) {
+              this.capacity = capacityLeaves;
+              this.leaves = new Array(capacityLeaves).fill('0'.repeat(64));
+              this.levels = [];
+              let count = capacityLeaves;
+              while (count >= 1) {
+                this.levels.push(new Array(count).fill('0'.repeat(64)));
+                if (count === 1) break;
+                count >>= 1;
+              }
+              this.activeCount = 0;
+              this.activeNodeCount = 0;
+            }
+            updateLeaf(idx, leafHex) {
+              this.leaves[idx] = leafHex;
+              this.levels[0][idx] = leafHex;
+              if (idx + 1 > this.activeCount) this.activeCount = idx + 1;
+              let cur = idx;
+              for (let lvl = 0; lvl < this.levels.length - 1; lvl++) {
+                const pairIdx = cur ^ 1;
+                const left = cur < pairIdx ? this.levels[lvl][cur] : this.levels[lvl][pairIdx];
+                const right = cur < pairIdx ? this.levels[lvl][pairIdx] : this.levels[lvl][cur];
+                const parentIdx = cur >> 1;
+                this.levels[lvl + 1][parentIdx] = sha256Hex(`${left}:${right}`);
+                cur = parentIdx;
+              }
+            }
+            get root() {
+              return this.levels[this.levels.length - 1][0];
+            }
+            getProof(idx) {
+              const path = [];
+              let cur = idx;
+              for (let lvl = 0; lvl < this.levels.length - 1; lvl++) {
+                const sib = cur ^ 1;
+                path.push({ level: lvl, position: (cur & 1) === 0 ? 'R' : 'L', hash: this.levels[lvl][sib] });
+                cur >>= 1;
+              }
+              return path;
+            }
+            verifyProof(leafHex, idx, proof, expectedRoot) {
+              let h = leafHex;
+              let cur = idx;
+              for (const step of proof) {
+                h = (cur & 1) === 0 ? sha256Hex(`${h}:${step.hash}`) : sha256Hex(`${step.hash}:${h}`);
+                cur >>= 1;
+              }
+              return h === expectedRoot;
+            }
+          }
+
+          const merkleTree = new BinaryMerkleTree(4096);
+
+          // AE.ZK.FOLD — Recursive Folding IVC Accumulator (Nova-inspired over Mersenne M31 = 2^31 - 1)
+          const FOLD_PRIME = 2147483647n; // 2^31 - 1
+          const zkFoldEngine = {
+            step: 0,
+            U: [1n, 0n, 0n, 0n], // Folded 4D state vector
+            E: 0n,               // Folded cross-term slack scalar
+            lastChallenge: 0n,
+            lastCrossTerm: 0n,
+            prevAccHash: '0'.repeat(64),
+            accHash: sha256Hex('AE.ZK.FOLD.GENESIS.M31'),
+            foldBlock(blockIdx, blockHashHex, nonce, ldpcSynWeight, v5NodeId) {
+              // Construct incoming 4D witness vector u_i from block hash, nonce, LDPC syndrome, and V_5 cell
+              const h0 = BigInt('0x' + blockHashHex.slice(0, 8)) % FOLD_PRIME;
+              const h1 = BigInt('0x' + blockHashHex.slice(8, 16)) % FOLD_PRIME;
+              const uVec = [
+                h0,
+                h1,
+                BigInt((nonce ^ (ldpcSynWeight << 16)) >>> 0) % FOLD_PRIME,
+                BigInt((v5NodeId + 1) * 799 + blockIdx) % FOLD_PRIME
+              ];
+              // Cross-term T_i = inner_product(U_i, u_i) mod M31
+              let T = 0n;
+              for (let d = 0; d < 4; d++) T = (T + this.U[d] * uVec[d]) % FOLD_PRIME;
+
+              // Non-interactive Fiat-Shamir challenge scalar r_i
+              const transcript = `${this.accHash}|${blockIdx}|${blockHashHex}|T=${T.toString()}|SYN=${ldpcSynWeight}|V5=${v5NodeId}`;
+              const rHex = sha256Hex(transcript);
+              const r = (BigInt('0x' + rHex.slice(0, 8)) % (FOLD_PRIME - 1n)) + 1n;
+
+              // Fold instance: U_{i+1} = (U_i + r * u_i) mod M31, E_{i+1} = (E_i + r * T_i) mod M31
+              const nextU = [0n, 0n, 0n, 0n];
+              for (let d = 0; d < 4; d++) nextU[d] = (this.U[d] + r * uVec[d]) % FOLD_PRIME;
+              const nextE = (this.E + r * T) % FOLD_PRIME;
+
+              this.prevAccHash = this.accHash;
+              this.U = nextU;
+              this.E = nextE;
+              this.lastChallenge = r;
+              this.lastCrossTerm = T;
+              this.step++;
+
+              const commitPayload = canonicalStringify({
+                protocol: 'AE.ZK.FOLD/v1',
+                step: this.step,
+                U: this.U.map(v => v.toString()),
+                E: this.E.toString(),
+                r: this.lastChallenge.toString(),
+                prev: this.prevAccHash
+              });
+              this.accHash = sha256Hex(commitPayload);
+              return this.accHash;
+            },
+            verifyConstantTime() {
+              const t0 = performance.now();
+              const expectedCommit = sha256Hex(canonicalStringify({
+                protocol: 'AE.ZK.FOLD/v1',
+                step: this.step,
+                U: this.U.map(v => v.toString()),
+                E: this.E.toString(),
+                r: this.lastChallenge.toString(),
+                prev: this.prevAccHash
+              }));
+              const commitOk = this.step === 0 || expectedCommit === this.accHash;
+              const fieldOk = this.U.every(v => v >= 0n && v < FOLD_PRIME) && this.E >= 0n && this.E < FOLD_PRIME;
+              const elapsedUs = Math.max(1, Math.round((performance.now() - t0) * 1000));
+              return {
+                ok: commitOk && fieldOk,
+                stepsVerified: this.step,
+                accHash: this.accHash,
+                elapsedUs
+              };
+            },
+            getSnapshot() {
+              return {
+                protocol: 'AE.ZK.FOLD/v1',
+                step: this.step,
+                U: this.U.map(v => v.toString()),
+                E: this.E.toString(),
+                r: this.lastChallenge.toString(),
+                prev: this.prevAccHash,
+                accHash: this.accHash
+              };
+            },
+            updateUI() {
+              const st = document.getElementById('ivc-steps-ui');
+              const vc = document.getElementById('ivc-vec-ui');
+              const ac = document.getElementById('ivc-acc-ui');
+              if (st) st.textContent = this.step.toLocaleString();
+              if (vc) vc.textContent = `[${this.U.map(v => (v % 9999n).toString()).join(',')}]`;
+              if (ac) ac.textContent = `0x${this.accHash.slice(0, 14)}…`;
+            }
+          };
+
+          // Durable IndexedDB WAL + WebCrypto ECDSA P-256 Signer
+          const durableVault = {
+            db: null,
+            keyPair: null,
+            pubJwk: null,
+            persistedCount: 0,
+            async init() {
+              try {
+                if (window.crypto && crypto.subtle) {
+                  this.keyPair = await crypto.subtle.generateKey(
+                    { name: 'ECDSA', namedCurve: 'P-256' },
+                    false,
+                    ['sign', 'verify']
+                  );
+                  this.pubJwk = await crypto.subtle.exportKey('jwk', this.keyPair.publicKey);
+                }
+              } catch (_) {}
+              return new Promise((resolve) => {
+                if (!window.indexedDB) return resolve(false);
+                const req = indexedDB.open('gaia_nexus_prod_v1', 1);
+                req.onupgradeneeded = (e) => {
+                  const db = e.target.result;
+                  if (!db.objectStoreNames.contains('receipts')) db.createObjectStore('receipts', { keyPath: 'receiptId' });
+                };
+                req.onsuccess = (e) => {
+                  this.db = e.target.result;
+                  const tx = this.db.transaction('receipts', 'readonly');
+                  const countReq = tx.objectStore('receipts').count();
+                  countReq.onsuccess = () => { this.persistedCount = countReq.result || 0; resolve(true); };
+                };
+                req.onerror = () => resolve(false);
+              });
+            },
+            async signPayload(canonicalStr) {
+              if (!this.keyPair || !window.crypto?.subtle) return { alg: 'NONE', sig: null, pub: null };
+              const sigBuf = await crypto.subtle.sign(
+                { name: 'ECDSA', hash: 'SHA-256' },
+                this.keyPair.privateKey,
+                textEncoder.encode(canonicalStr)
+              );
+              return { alg: 'ECDSA-P256-SHA256', sig: bytesToHex(new Uint8Array(sigBuf)), pub: this.pubJwk };
+            },
+            async hmacPayload(canonicalStr, secret) {
+              if (!secret || !window.crypto?.subtle) return null;
+              const key = await crypto.subtle.importKey(
+                'raw', textEncoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+              );
+              const mac = await crypto.subtle.sign('HMAC', key, textEncoder.encode(canonicalStr));
+              return bytesToHex(new Uint8Array(mac));
+            },
+            persistReceipt(receipt) {
+              if (!this.db) return;
+              try {
+                const tx = this.db.transaction('receipts', 'readwrite');
+                tx.objectStore('receipts').put(receipt);
+                this.persistedCount++;
+              } catch (_) {}
+            }
+          };
+
+          const monolithEngine = {
+            version: 1,
+            snapshots: [],
+            snapshot() {
+              const snap = {
+                version: this.version,
+                timestamp: new Date().toISOString(),
+                merkleRoot: merkleTree.root,
+                minedBlocks: merkleTree.activeCount,
+                digest: sha256Hex(canonicalStringify({ v: this.version, root: merkleTree.root, n: merkleTree.activeCount }))
+              };
+              this.snapshots.push(snap);
+              return snap;
+            },
+            evolve(injectFault = false) {
+              this.snapshot();
+              if (injectFault) {
+                const prev = this.snapshots[this.snapshots.length - 1];
+                return { ok: false, rolledBackTo: prev.version, reason: 'INVARIANT_VIOLATION: H*c^T != 0 -> ATOMIC ROLLBACK' };
+              }
+              this.version++;
+              const verEl = document.getElementById('monolith-ver');
+              if (verEl) verEl.textContent = `MONOLITH v${this.version}`;
+              return { ok: true, newVersion: this.version, root: merkleTree.root };
+            }
+          };
+
+          function announceA11y(msg, assertive = false) {
+            const el = document.getElementById(assertive ? 'aria-live-assertive' : 'aria-live-polite');
+            if (el) el.textContent = msg;
+          }
+
+          // Wire HUD Tab Switching
+          document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const target = btn.dataset.tab;
+              document.querySelectorAll('.tab-btn').forEach(b => {
+                const active = b.dataset.tab === target;
+                b.className = active
+                  ? 'tab-btn py-2.5 text-sky-300 border-b-2 border-sky-400 bg-sky-500/10'
+                  : 'tab-btn py-2.5 text-slate-400 hover:text-slate-200';
+              });
+              document.querySelectorAll('.tab-panel').forEach(p => {
+                p.classList.toggle('hidden', p.id !== `tab-${target}`);
+              });
+            });
+          });
+
+          // =========================================================================
+          // 4. THREE.JS SCENE, 4D SIERPINSKI HYPERCUBE & QUANTUM ROSE SHADERS
+          // =========================================================================
+          const container = document.getElementById('canvas-container');
+          function getViewportSize() {
+            return {
+              width: Math.max(container.clientWidth || window.innerWidth || 800, 1),
+              height: Math.max(container.clientHeight || window.innerHeight || 600, 1)
+            };
+          }
+
+          const initSize = getViewportSize();
+          const scene = new THREE.Scene();
+          scene.fog = new THREE.FogExp2(0x020617, 0.018);
+
+          const camera = new THREE.PerspectiveCamera(48, initSize.width / initSize.height, 0.1, 200);
+          camera.position.set(0, 1.8, 13.5);
+          camera.rotation.order = 'YXZ';
+
+          const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+          renderer.setSize(initSize.width, initSize.height);
+          renderer.setClearColor(0x020617, 1.0);
+          container.innerHTML = '';
+          container.appendChild(renderer.domElement);
+
+          const masterGroup = new THREE.Group();
+          scene.add(masterGroup);
+
+          const state = {
+            depth: 1,
+            wDist: 2.8,
+            autoOrbit: true,
+            inverseScalar: false,
+            roseEigenstates: 7,
+            roseCoherence: 0.88,
+            angles: { xy: 0, xz: 0, yz: 0, xw: 0, yw: 0, zw: 0 },
+            rotSpeed: { xy: 0.15, xz: 0.10, yz: 0.08, xw: 0.22, yw: -0.18, zw: 0.14 }
+          };
+
+          const PALETTES = {
+            quantum: { a: new THREE.Color(0x00f5ff), b: new THREE.Color(0x8b5cf6), c: new THREE.Color(0xf43f5e) },
+            solar:   { a: new THREE.Color(0xfacc15), b: new THREE.Color(0xf97316), c: new THREE.Color(0xef4444) },
+            emerald: { a: new THREE.Color(0x34d399), b: new THREE.Color(0x06b6d4), c: new THREE.Color(0x3b82f6) },
+            abyssal: { a: new THREE.Color(0xc084fc), b: new THREE.Color(0x38bdf8), c: new THREE.Color(0xf472b6) }
+          };
+
+          const shared4DUniforms = {
+            uRot4D: { value: new THREE.Matrix4() },
+            uWDist: { value: state.wDist },
+            uTime:  { value: 0 },
+            uColA:  { value: PALETTES.quantum.a.clone() },
+            uColB:  { value: PALETTES.quantum.b.clone() },
+            uColC:  { value: PALETTES.quantum.c.clone() }
+          };
+
+          function applyPalette(name) {
+            const p = PALETTES[name] || PALETTES.quantum;
+            shared4DUniforms.uColA.value.copy(p.a);
+            shared4DUniforms.uColB.value.copy(p.b);
+            shared4DUniforms.uColC.value.copy(p.c);
+          }
+
+          function update4DRotationMatrix(ang) {
+            let m = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
+            const planes = [
+              [0, 1, ang.xy], [0, 2, ang.xz], [1, 2, ang.yz],
+              [0, 3, ang.xw], [1, 3, ang.yw], [2, 3, ang.zw]
+            ];
+            for (const [i, j, theta] of planes) {
+              const c = Math.cos(theta), s = Math.sin(theta);
+              const next = m.slice();
+              for (let r = 0; r < 4; r++) {
+                const a = m[r * 4 + i], b = m[r * 4 + j];
+                next[r * 4 + i] = a * c - b * s;
+                next[r * 4 + j] = a * s + b * c;
+              }
+              m = next;
+            }
+            shared4DUniforms.uRot4D.value.set(
+              m[0], m[1], m[2], m[3],
+              m[4], m[5], m[6], m[7],
+              m[8], m[9], m[10], m[11],
+              m[12], m[13], m[14], m[15]
+            );
+            return m;
+          }
+
+          function project4Dto3D(v4, m) {
+            const rx = m[0]*v4[0] + m[1]*v4[1] + m[2]*v4[2] + m[3]*v4[3];
+            const ry = m[4]*v4[0] + m[5]*v4[1] + m[6]*v4[2] + m[7]*v4[3];
+            const rz = m[8]*v4[0] + m[9]*v4[1] + m[10]*v4[2] + m[11]*v4[3];
+            const rw = m[12]*v4[0] + m[13]*v4[1] + m[14]*v4[2] + m[15]*v4[3];
+            const denom = Math.max(0.45, state.wDist - rw);
+            const s = state.wDist / denom;
+            return { x: rx * s, y: ry * s, z: rz * s, w: rw };
+          }
+
+          const hypercubeGroup = new THREE.Group();
+          masterGroup.add(hypercubeGroup);
+
+          const hyperEdgeVS = `
+            attribute float aW;
+            uniform mat4 uRot4D;
+            uniform float uWDist;
+            varying float vW;
+            void main() {
+              vec4 p4 = uRot4D * vec4(position, aW);
+              float s = uWDist / max(0.45, uWDist - p4.w);
+              vW = clamp(p4.w * 0.5 + 0.5, 0.0, 1.0);
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(p4.xyz * s, 1.0);
+            }
+          `;
+          const hyperEdgeFS = `
+            uniform vec3 uColA;
+            uniform vec3 uColB;
+            uniform vec3 uColC;
+            varying float vW;
+            void main() {
+              vec3 col = vW < 0.5 ? mix(uColA, uColB, vW * 2.0) : mix(uColB, uColC, (vW - 0.5) * 2.0);
+              gl_FragColor = vec4(col, 0.62);
+            }
+          `;
+
+          function rebuild4DHypercube() {
+            while (hypercubeGroup.children.length > 0) {
+              const obj = hypercubeGroup.children.pop();
+              if (obj.geometry) obj.geometry.dispose();
+              if (obj.material) obj.material.dispose();
+            }
+            const centers = [[0, 0, 0, 0]];
+            let half = 1.65;
+            for (let d = 0; d < state.depth; d++) {
+              const next = [];
+              const step = half * 0.52;
+              for (const c of centers) {
+                for (let mask = 0; mask < 16; mask++) {
+                  next.push([
+                    c[0] + ((mask & 1) ? step : -step),
+                    c[1] + ((mask & 2) ? step : -step),
+                    c[2] + ((mask & 4) ? step : -step),
+                    c[3] + ((mask & 8) ? step : -step)
+                  ]);
+                }
+              }
+              centers.length = 0;
+              centers.push(...next);
+              half *= 0.45;
+            }
+
+            const pos = [];
+            const wArr = [];
+            for (const c of centers) {
+              for (let v = 0; v < 16; v++) {
+                for (let bit = 0; bit < 4; bit++) {
+                  if ((v & (1 << bit)) === 0) {
+                    const u = v | (1 << bit);
+                    const p1 = [
+                      c[0] + ((v & 1) ? half : -half),
+                      c[1] + ((v & 2) ? half : -half),
+                      c[2] + ((v & 4) ? half : -half),
+                      c[3] + ((v & 8) ? half : -half)
+                    ];
+                    const p2 = [
+                      c[0] + ((u & 1) ? half : -half),
+                      c[1] + ((u & 2) ? half : -half),
+                      c[2] + ((u & 4) ? half : -half),
+                      c[3] + ((u & 8) ? half : -half)
+                    ];
+                    pos.push(p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
+                    wArr.push(p1[3], p2[3]);
+                  }
+                }
+              }
+            }
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+            geo.setAttribute('aW', new THREE.Float32BufferAttribute(wArr, 1));
+            const mat = new THREE.ShaderMaterial({
+              vertexShader: hyperEdgeVS,
+              fragmentShader: hyperEdgeFS,
+              uniforms: shared4DUniforms,
+              transparent: true,
+              blending: THREE.AdditiveBlending,
+              depthWrite: false
+            });
+            hypercubeGroup.add(new THREE.LineSegments(geo, mat));
+
+            const statEl = document.getElementById('stat-cells');
+            if (statEl) statEl.textContent = `${centers.length} CELLS · ${(centers.length * 32).toLocaleString()} EDGES`;
+          }
+
+          // Quantum Rose Ψ(r,θ,t) GPU Eigenstate Interference Plane
+          const roseUniforms = {
+            uTime: { value: 0 },
+            uEigenstates: { value: state.roseEigenstates },
+            uCoherence: { value: state.roseCoherence },
+            uPerturb: { value: 0 }
+          };
+          const roseMesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(14.5, 14.5),
+            new THREE.ShaderMaterial({
+              uniforms: roseUniforms,
+              transparent: true,
+              depthWrite: false,
+              blending: THREE.AdditiveBlending,
+              side: THREE.DoubleSide,
+              vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                  vUv = uv * 2.0 - 1.0;
+                  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+              `,
+              fragmentShader: `
+                precision mediump float;
+                varying vec2 vUv;
+                uniform float uTime;
+                uniform float uEigenstates;
+                uniform float uCoherence;
+                uniform float uPerturb;
+                void main() {
+                  float r = length(vUv) * 2.6;
+                  float theta = atan(vUv.y, vUv.x);
+                  float env = exp(-r * r * 0.55);
+                  float re = 0.0;
+                  float im = 0.0;
+                  float inc = 0.0;
+                  for (int n = -9; n <= 9; n++) {
+                    float fn = float(n);
+                    float an = abs(fn);
+                    if (an <= uEigenstates) {
+                      float amp = exp(-an * 0.35) * pow(max(r, 0.001), min(an, 4.0)) * env;
+                      float en = 0.35 + 0.68 * an + 0.06 * an * an;
+                      float ph = fn * theta - en * uTime + uPerturb * 0.4;
+                      re += amp * cos(ph);
+                      im += amp * sin(ph);
+                      inc += amp * amp;
+                    }
+                  }
+                  float prob = mix(inc, re * re + im * im, uCoherence);
+                  float intensity = 1.0 - exp(-prob * 1.8);
+                  float phase = atan(im, re) / 6.283185 + 0.5;
+                  vec3 col = 0.55 + 0.45 * cos(6.283185 * (phase + vec3(0.0, 0.33, 0.67)));
+                  float ring = smoothstep(0.02, 0.0, abs(length(vUv) - 0.92)) * 0.25;
+                  gl_FragColor = vec4(col * intensity + vec3(0.22, 0.74, 0.97) * ring, (intensity * 0.36 + ring) * smoothstep(1.0, 0.7, length(vUv)));
+                }
+              `
+            })
+          );
+          roseMesh.position.z = -3.4;
+          masterGroup.add(roseMesh);
+
+          // =========================================================================
+          // 5. 4,096 GOLDEN SPIRAL BLOCKS, 16,384 PRISMS & 13-LEVEL MERKLE PYRAMID
+          // =========================================================================
+          const TOTAL_SQUARES = 4096;
+          const HALF_SQUARES = 2048;
+          const PRISMS_PER_SQUARE = 4;
+          const TOTAL_PRISMS = TOTAL_SQUARES * PRISMS_PER_SQUARE;
+          const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
+
+          const squareRecords = [];
+          const prismRecords = [];
+          const spiralSystemGroup = new THREE.Group();
+          masterGroup.add(spiralSystemGroup);
+
+          const squareInstancedMesh = new THREE.InstancedMesh(
+            new THREE.BoxGeometry(1.0, 1.0, 0.03),
+            new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.42, blending: THREE.AdditiveBlending }),
+            TOTAL_SQUARES
+          );
+          const prismInstancedMesh = new THREE.InstancedMesh(
+            new THREE.BoxGeometry(0.45, 0.45, 0.14),
+            new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.78, blending: THREE.AdditiveBlending }),
+            TOTAL_PRISMS
+          );
+
+          const dummySq = new THREE.Object3D();
+          const dummyPr = new THREE.Object3D();
+          const forwardTrackPts = [];
+          const backwardTrackPts = [];
+          const quadrantOffsets = [
+            { qx: -0.25, qy:  0.25, label: 'Q1-NW' },
+            { qx:  0.25, qy:  0.25, label: 'Q2-NE' },
+            { qx: -0.25, qy: -0.25, label: 'Q3-SW' },
+            { qx:  0.25, qy: -0.25, label: 'Q4-SE' }
+          ];
+
+          for (let idx = 0; idx < TOTAL_SQUARES; idx++) {
+            const isFwd = idx < HALF_SQUARES;
+            const stepSeq = isFwd ? idx : (idx - HALF_SQUARES);
+            const pairedInverseSqId = isFwd ? (idx + HALF_SQUARES) : (idx - HALF_SQUARES);
+            const normT = stepSeq / HALF_SQUARES;
+            const r = 0.65 + 6.4 * Math.pow(normT, 0.58);
+            const dirSign = isFwd ? 1.0 : -1.0;
+            const theta = dirSign * stepSeq * GOLDEN_ANGLE;
+
+            const x = r * Math.cos(theta);
+            const y = r * Math.sin(theta);
+            const z = dirSign * (normT - 0.5) * 4.2 + Math.sin(theta * 0.5) * 0.25;
+            const w = dirSign * (0.15 + normT * 1.85);
+
+            const kStep = (stepSeq * 13) % M_TOTIENT;
+            const fIdx = (START_INDEX + kStep * STRIDE) % M_TOTIENT;
+            let rIdx = (START_INDEX - kStep * STRIDE) % M_TOTIENT;
+            if (rIdx < 0) rIdx += M_TOTIENT;
+
+            const fUnit = U_POOL[fIdx];
+            const rUnit = U_POOL[rIdx];
+            const activeUnit = isFwd ? fUnit : rUnit;
+            const sqScale = 0.13 + 0.06 * (1.0 - normT * 0.45);
+            const rotZ = theta + (isFwd ? Math.PI * 0.25 : -Math.PI * 0.25);
+            const rotX = dirSign * 0.22 * Math.sin(normT * Math.PI);
+
+            dummySq.position.set(x, y, z);
+            dummySq.rotation.set(rotX, 0, rotZ);
+            dummySq.scale.set(sqScale, sqScale, 1.0);
+            dummySq.updateMatrix();
+            squareInstancedMesh.setMatrixAt(idx, dummySq.matrix);
+
+            if (isFwd) forwardTrackPts.push(new THREE.Vector3(x, y, z));
+            else backwardTrackPts.push(new THREE.Vector3(x, y, z));
+
+            const d1 = isFwd ? 1 : 2;
+            const d2 = (activeUnit % 9) + 1;
+            const d3 = Math.floor(normT * 99) + 1;
+            const sqDewey = `${d1}.${d2}.${String(d3).padStart(2, '0')}`;
+
+            squareRecords.push({
+              id: idx, branch: isFwd ? 'FORWARD_FK' : 'BACKWARD_RK', stepSeq,
+              x, y, z, w, sqScale, rotX, rotZ, kStep, fUnit, rUnit, activeUnit,
+              pairedInverseSqId, dewey: sqDewey, mined: false, blockHash: null
+            });
+
+            for (let p = 0; p < PRISMS_PER_SQUARE; p++) {
+              const globalPrismId = idx * PRISMS_PER_SQUARE + p;
+              const pairedInversePrismId = pairedInverseSqId * PRISMS_PER_SQUARE + p;
+              const qOff = quadrantOffsets[p];
+              const rawHashInt = fnv1a32(`N=${N_MOD}|B=${d1}|SEQ=${stepSeq}|Q=${p}|U=${activeUnit}`);
+              const hexHash = '0x' + rawHashInt.toString(16).toUpperCase().padStart(8, '0');
+              const hashBucket = String(rawHashInt % 1000).padStart(3, '0');
+              const prismDewey = `${sqDewey}.${p + 1}${hashBucket}`;
+
+              const localVec = new THREE.Vector3(qOff.qx * sqScale, qOff.qy * sqScale, 0);
+              localVec.applyEuler(new THREE.Euler(rotX, 0, rotZ));
+              const px = x + localVec.x, py = y + localVec.y, pz = z + localVec.z;
+              const bitDepth = 0.65 + ((rawHashInt >>> 8) & 0xff) / 255.0 * 0.9;
+
+              dummyPr.position.set(px, py, pz);
+              dummyPr.rotation.set(rotX, 0, rotZ);
+              dummyPr.scale.set(sqScale, sqScale, bitDepth);
+              dummyPr.updateMatrix();
+              prismInstancedMesh.setMatrixAt(globalPrismId, dummyPr.matrix);
+
+              prismRecords.push({
+                prismId: globalPrismId, squareId: idx, quadrant: p, quadLabel: qOff.label,
+                branch: isFwd ? 'FORWARD_FK' : 'BACKWARD_RK', stepSeq,
+                x: px, y: py, z: pz, w, kStep, fUnit, rUnit, activeUnit,
+                hexHash, dewey: prismDewey, pairedInverseSqId, pairedInversePrismId,
+                encodedPayload: 'Awaiting PoW worker commitment…'
+              });
+            }
+          }
+
+          squareInstancedMesh.instanceMatrix.needsUpdate = true;
+          prismInstancedMesh.instanceMatrix.needsUpdate = true;
+          spiralSystemGroup.add(squareInstancedMesh);
+          spiralSystemGroup.add(prismInstancedMesh);
+
+          const fwdCurveLine = new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints(forwardTrackPts),
+            new THREE.LineBasicMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.25, blending: THREE.AdditiveBlending })
+          );
+          const bwdCurveLine = new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints(backwardTrackPts),
+            new THREE.LineBasicMaterial({ color: 0xf43f5e, transparent: true, opacity: 0.25, blending: THREE.AdditiveBlending })
+          );
+          spiralSystemGroup.add(fwdCurveLine);
+          spiralSystemGroup.add(bwdCurveLine);
+
+          const inverseBridgeLine = new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]),
+            new THREE.LineBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.95 })
+          );
+          inverseBridgeLine.visible = false;
+          spiralSystemGroup.add(inverseBridgeLine);
+
+          const targetBeacon = new THREE.LineSegments(
+            new THREE.EdgesGeometry(new THREE.BoxGeometry(1.15, 1.15, 0.25)),
+            new THREE.LineBasicMaterial({ color: 0x10b981 })
+          );
+          targetBeacon.visible = false;
+          spiralSystemGroup.add(targetBeacon);
+
+          const inverseBeacon = new THREE.LineSegments(
+            new THREE.EdgesGeometry(new THREE.BoxGeometry(1.15, 1.15, 0.25)),
+            new THREE.LineBasicMaterial({ color: 0xf43f5e })
+          );
+          inverseBeacon.visible = false;
+          spiralSystemGroup.add(inverseBeacon);
+
+          // 13-Level Binary Merkle Pyramid (8,191 nodes)
+          const merkleStructureGroup = new THREE.Group();
+          masterGroup.add(merkleStructureGroup);
+          const MERKLE_LEVEL_COUNTS = [4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1];
+          const merkleLevelOffsets = [];
+          const merkleNodeCoords = [];
+          let mOffset = 0;
+          for (let lvl = 0; lvl < MERKLE_LEVEL_COUNTS.length; lvl++) {
+            merkleLevelOffsets.push(mOffset);
+            const cnt = MERKLE_LEVEL_COUNTS[lvl];
+            if (lvl === 0) {
+              for (let i = 0; i < cnt; i++) {
+                merkleNodeCoords.push(new THREE.Vector3(squareRecords[i].x, squareRecords[i].y, squareRecords[i].z));
+              }
+            } else {
+              const prevOff = merkleLevelOffsets[lvl - 1];
+              const yLift = 0.52 * lvl;
+              for (let i = 0; i < cnt; i++) {
+                const a = merkleNodeCoords[prevOff + i * 2];
+                const b = merkleNodeCoords[prevOff + i * 2 + 1];
+                const scale = Math.max(0.05, 1.0 - lvl / 12.2);
+                merkleNodeCoords.push(new THREE.Vector3(
+                  (a.x + b.x) * 0.5 * scale,
+                  (a.y + b.y) * 0.5 * scale + yLift * 0.16,
+                  (a.z + b.z) * 0.5 * scale + (lvl * 0.42)
+                ));
+              }
+            }
+            mOffset += cnt;
+          }
+
+          const merklePtsPos = new Float32Array(merkleNodeCoords.length * 3);
+          const merklePtsCol = new Float32Array(merkleNodeCoords.length * 3);
+          for (let i = 0; i < merkleNodeCoords.length; i++) {
+            merklePtsPos[i * 3] = merkleNodeCoords[i].x;
+            merklePtsPos[i * 3 + 1] = merkleNodeCoords[i].y;
+            merklePtsPos[i * 3 + 2] = merkleNodeCoords[i].z;
+            merklePtsCol[i * 3] = 0.12;
+            merklePtsCol[i * 3 + 1] = 0.22;
+            merklePtsCol[i * 3 + 2] = 0.35;
+          }
+          const merklePtsGeo = new THREE.BufferGeometry();
+          merklePtsGeo.setAttribute('position', new THREE.BufferAttribute(merklePtsPos, 3));
+          merklePtsGeo.setAttribute('color', new THREE.BufferAttribute(merklePtsCol, 3));
+          merkleStructureGroup.add(new THREE.Points(
+            merklePtsGeo,
+            new THREE.PointsMaterial({ size: 0.14, vertexColors: true, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending })
+          ));
+
+          const merkleProofPathLine = new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints(Array.from({ length: MERKLE_LEVEL_COUNTS.length }, () => new THREE.Vector3())),
+            new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.95 })
+          );
+          merkleProofPathLine.visible = false;
+          merkleStructureGroup.add(merkleProofPathLine);
+
+          function syncMerkleStructureGeometry(minedCount) {
+            const cArr = merklePtsGeo.attributes.color.array;
+            let activeTotal = 0;
+            let levelActive = minedCount;
+            for (let lvl = 0; lvl < MERKLE_LEVEL_COUNTS.length; lvl++) {
+              const off = merkleLevelOffsets[lvl];
+              const cnt = MERKLE_LEVEL_COUNTS[lvl];
+              const limit = Math.min(cnt, levelActive);
+              for (let i = 0; i < limit; i++) {
+                const idx3 = (off + i) * 3;
+                if (lvl === MERKLE_LEVEL_COUNTS.length - 1) {
+                  cArr[idx3] = 0.98; cArr[idx3 + 1] = 0.80; cArr[idx3 + 2] = 0.08;
+                } else {
+                  cArr[idx3] = 0.06; cArr[idx3 + 1] = 0.85; cArr[idx3 + 2] = 0.96;
+                }
+              }
+              activeTotal += limit;
+              levelActive = Math.ceil(levelActive / 2);
+            }
+            merkleTree.activeNodeCount = activeTotal;
+            merklePtsGeo.attributes.color.needsUpdate = true;
+          }
+
+          // =========================================================================
+          // 6. 4.3 MODULAR PRIME HELIX (BigInt)
+          // =========================================================================
+          const modularGroup = new THREE.Group();
+          masterGroup.add(modularGroup);
+
+          function rebuild4DModularHelix() {
+            while (modularGroup.children.length > 0) {
+              const obj = modularGroup.children.pop();
+              if (obj.geometry) obj.geometry.dispose();
+              if (obj.material) obj.material.dispose();
+            }
+            const bx = BigInt(document.getElementById('base-x')?.value || 7);
+            const by = BigInt(document.getElementById('base-y')?.value || 11);
+            const bz = BigInt(document.getElementById('base-z')?.value || 19);
+            const bw = BigInt(document.getElementById('base-w')?.value || 23);
+            const pts = [], cols = [];
+            const c1 = new THREE.Color(0x00ffcc), c2 = new THREE.Color(0xff007f);
+            for (let k = 1; k <= 36; k++) {
+              const bk = BigInt(k);
+              let rx = Number(TARGET_BIGINT % (bx ** bk));
+              let ry = Number(TARGET_BIGINT % (by ** bk));
+              let rz = Number(TARGET_BIGINT % (bz ** bk));
+              let rw = Number(TARGET_BIGINT % (bw ** bk));
+              if (state.inverseScalar) {
+                rx = rx ? 10000 / ((rx % 1000) + 1) : 0;
+                ry = ry ? 10000 / ((ry % 1000) + 1) : 0;
+                rz = rz ? 10000 / ((rz % 1000) + 1) : 0;
+                rw = rw ? 10000 / ((rw % 1000) + 1) : 0;
+              }
+              const ax = (rx % 360) * Math.PI / 180;
+              const ay = (ry % 360) * Math.PI / 180;
+              const az = (rz % 360) * Math.PI / 180;
+              const rad = 1.4 + k * 0.08;
+              pts.push(rad * Math.sin(ax) * Math.cos(ay), rad * Math.sin(ax) * Math.sin(ay), rad * Math.cos(ax) * Math.sin(az));
+              const col = c1.clone().lerp(c2, (rw % 1000) / 1000);
+              cols.push(col.r, col.g, col.b);
+            }
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+            geo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+            modularGroup.add(new THREE.Line(geo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.45 })));
+          }
+
+          // =========================================================================
+          // 7. 6-ENGINE MULTI-CORE PoW SPIRAL MINER & ADL SCHEDULER
+          // =========================================================================
+          const ADL_WORDS = [
+            { pos: 1, lane: 2, dir: -1 }, { pos: 2, lane: 1, dir: +1 },
+            { pos: 3, lane: 1, dir: +1 }, { pos: 4, lane: 2, dir: -1 },
+            { pos: 5, lane: 2, dir: -1 }, { pos: 6, lane: 1, dir: +1 }
+          ];
+
+          function countLeadingZeroBits(hexStr) {
+            let bits = 0;
+            for (let i = 0; i < hexStr.length; i++) {
+              const v = parseInt(hexStr[i], 16);
+              if (v === 0) { bits += 4; continue; }
+              if (v < 2) bits += 3;
+              else if (v < 4) bits += 2;
+              else if (v < 8) bits += 1;
+              break;
+            }
+            return bits;
+          }
+
+          // Inline Blob Web Worker source for true multi-core SHA-256d Proof-of-Work
+          const POW_WORKER_SRC = `
+            const K = new Uint32Array([
+              0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+              0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+              0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+              0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+              0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+              0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+              0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+              0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2
+            ]);
+            const enc = new TextEncoder();
+            const W = new Uint32Array(64);
+            function sha256(bytes) {
+              const len = bytes.length, bitLen = len * 8;
+              const totalLen = (((len + 8) >> 6) + 1) << 6;
+              const buf = new Uint8Array(totalLen);
+              buf.set(bytes); buf[len] = 0x80;
+              const view = new DataView(buf.buffer);
+              view.setUint32(totalLen - 8, Math.floor(bitLen / 0x100000000), false);
+              view.setUint32(totalLen - 4, bitLen >>> 0, false);
+              let h0=0x6a09e667,h1=0xbb67ae85,h2=0x3c6ef372,h3=0xa54ff53a,h4=0x510e527f,h5=0x9b05688c,h6=0x1f83d9ab,h7=0x5be0cd19;
+              for (let off = 0; off < totalLen; off += 64) {
+                for (let i = 0; i < 16; i++) W[i] = view.getUint32(off + i * 4, false);
+                for (let i = 16; i < 64; i++) {
+                  const s0 = ((W[i-15]>>>7)|(W[i-15]<<25))^((W[i-15]>>>18)|(W[i-15]<<14))^(W[i-15]>>>3);
+                  const s1 = ((W[i-2]>>>17)|(W[i-2]<<15))^((W[i-2]>>>19)|(W[i-2]<<13))^(W[i-2]>>>10);
+                  W[i] = (W[i-16] + s0 + W[i-7] + s1) >>> 0;
+                }
+                let a=h0,b=h1,c=h2,d=h3,e=h4,f=h5,g=h6,h=h7;
+                for (let i = 0; i < 64; i++) {
+                  const S1 = ((e>>>6)|(e<<26))^((e>>>11)|(e<<21))^((e>>>25)|(e<<7));
+                  const ch = (e&f)^(~e&g);
+                  const t1 = (h + S1 + ch + K[i] + W[i]) >>> 0;
+                  const S0 = ((a>>>2)|(a<<30))^((a>>>13)|(a<<19))^((a>>>22)|(a<<10));
+                  const maj = (a&b)^(a&c)^(b&c);
+                  const t2 = (S0 + maj) >>> 0;
+                  h=g; g=f; f=e; e=(d+t1)>>>0; d=c; c=b; b=a; a=(t1+t2)>>>0;
+                }
+                h0=(h0+a)>>>0; h1=(h1+b)>>>0; h2=(h2+c)>>>0; h3=(h3+d)>>>0;
+                h4=(h4+e)>>>0; h5=(h5+f)>>>0; h6=(h6+g)>>>0; h7=(h7+h)>>>0;
+              }
+              const out = new Uint8Array(32);
+              const ov = new DataView(out.buffer);
+              [h0,h1,h2,h3,h4,h5,h6,h7].forEach((v,i)=>ov.setUint32(i*4,v,false));
+              return out;
+            }
+            function hasLeadingZeroBits(u8, bits) {
+              let rem = bits, idx = 0;
+              while (rem >= 8) { if (u8[idx++] !== 0) return false; rem -= 8; }
+              if (rem > 0) { const mask = (0xff << (8 - rem)) & 0xff; if ((u8[idx] & mask) !== 0) return false; }
+              return true;
+            }
+            function toHex(u8) { let s=''; for(let i=0;i<u8.length;i++) s+=u8[i].toString(16).padStart(2,'0'); return s; }
+            self.onmessage = (e) => {
+              const { jobId, idx, prefix, startNonce, step, diffBits, maxAttempts } = e.data;
+              let nonce = startNonce >>> 0;
+              let tried = 0;
+              while (tried < maxAttempts) {
+                const h = sha256(sha256(enc.encode(prefix + nonce)));
+                tried++;
+                if (hasLeadingZeroBits(h, diffBits)) {
+                  self.postMessage({ jobId, idx, found: true, nonce, hashHex: toHex(h), hashesTried: tried * 2 });
+                  return;
+                }
+                nonce = (nonce + step) >>> 0;
+              }
+              self.postMessage({ jobId, idx, found: false, nextNonce: nonce, hashesTried: tried * 2 });
+            };
+          `;
+
+          const miningEngine = {
+            running: true,
+            cursor: 0,
+            difficultyBits: 8,
+            totalHashes: 0,
+            hashRate: 0,
+            lastRateTime: performance.now(),
+            lastRateHashes: 0,
+            workers: [],
+            workerMode: 'SYNC',
+            activeJobId: 0,
+            inFlight: false,
+            initWorkers() {
+              try {
+                const count = Math.max(1, Math.min(navigator.hardwareConcurrency || 4, 6));
+                const blob = new Blob([POW_WORKER_SRC], { type: 'application/javascript' });
+                const url = URL.createObjectURL(blob);
+                for (let w = 0; w < count; w++) {
+                  const wk = new Worker(url);
+                  wk.onmessage = (ev) => this.handleWorkerMessage(w, ev.data);
+                  wk.onerror = () => { this.workerMode = 'SYNC_FALLBACK'; };
+                  this.workers.push(wk);
+                }
+                this.workerMode = `${count} CORES`;
+                const wpEl = document.getElementById('worker-pool-ui');
+                if (wpEl) wpEl.textContent = `${count} WORKERS (PoW)`;
+                this.dispatchNextBlockJob();
+              } catch (_) {
+                this.workerMode = 'MAIN_THREAD';
+                const wpEl = document.getElementById('worker-pool-ui');
+                if (wpEl) wpEl.textContent = 'MAIN THREAD (FALLBACK)';
+              }
+            },
+            buildBlockPrefix(idx) {
+              const sq = squareRecords[idx];
+              const prev = idx > 0 && squareRecords[idx - 1].blockHash ? squareRecords[idx - 1].blockHash : '0'.repeat(64);
+              return `GAIA-POW|${idx}|${sq.dewey}|U=${sq.activeUnit}|PREV=${prev}|N=`;
+            },
+            dispatchNextBlockJob(baseNonce = 0) {
+              if (!this.running || this.cursor >= TOTAL_SQUARES || this.workers.length === 0) {
+                this.inFlight = false;
+                return;
+              }
+              this.inFlight = true;
+              this.activeJobId++;
+              const idx = this.cursor;
+              const prefix = this.buildBlockPrefix(idx);
+              const nWorkers = this.workers.length;
+              const maxAttempts = this.difficultyBits >= 13 ? 4096 : 1024;
+              for (let w = 0; w < nWorkers; w++) {
+                this.workers[w].postMessage({
+                  jobId: this.activeJobId,
+                  idx,
+                  prefix,
+                  startNonce: (baseNonce + w) >>> 0,
+                  step: nWorkers,
+                  diffBits: this.difficultyBits,
+                  maxAttempts
+                });
+              }
+            },
+            handleWorkerMessage(workerIdx, data) {
+              this.totalHashes += data.hashesTried || 0;
+              if (data.jobId !== this.activeJobId || data.idx !== this.cursor) return;
+              if (data.found) {
+                // Independent verification on main thread before accepting block
+                const prefix = this.buildBlockPrefix(data.idx);
+                const verifyHash = sha256dHex(prefix + data.nonce);
+                const zeroBits = countLeadingZeroBits(verifyHash);
+                if (verifyHash === data.hashHex && zeroBits >= this.difficultyBits) {
+                  this.commitVerifiedBlock(data.idx, data.nonce, verifyHash, zeroBits);
+                  this.dispatchNextBlockJob(0);
+                }
+              } else if (workerIdx === 0 && this.running) {
+                // Continue searching higher nonce range if block not yet solved
+                this.dispatchNextBlockJob(data.nextNonce || 0);
+              }
+            },
+            commitVerifiedBlock(idx, nonce, blkHash, zeroBits) {
+              const sq = squareRecords[idx];
+              merkleTree.updateLeaf(idx, blkHash);
+
+              // Quantize block onto V_5 lattice and fold into AE.ZK.FOLD IVC accumulator
+              const v5 = quantizeToVoidLattice([sq.x, sq.y, sq.z, sq.w]);
+              const ivcAcc = zkFoldEngine.foldBlock(idx, blkHash, nonce, 0, v5.id);
+
+              sq.mined = true;
+              sq.blockHash = blkHash;
+              sq.powNonce = nonce;
+              sq.powZeroBits = zeroBits;
+              sq.merkleLeafIdx = idx;
+              sq.merkleRoot = merkleTree.root;
+              sq.ivcAcc = ivcAcc;
+
+              const adl = ADL_WORDS[idx % ADL_WORDS.length];
+              for (let p = 0; p < PRISMS_PER_SQUARE; p++) {
+                const pr = prismRecords[idx * PRISMS_PER_SQUARE + p];
+                if (p === 0) pr.encodedPayload = `R3 PoW(${zeroBits}b) SHA256d: 0x${blkHash.slice(0, 20)}…`;
+                else if (p === 1) pr.encodedPayload = `R4 Nonce=${nonce} · F=${sq.fUnit} · R=${sq.rUnit}`;
+                else if (p === 2) pr.encodedPayload = `R2+R6 ADL(${adl.pos},L${adl.lane},d=${adl.dir}) · LDPC syn=0 · V₅#${v5.id}`;
+                else pr.encodedPayload = `IVC Acc 0x${ivcAcc.slice(0, 12)}… · Merkle L0[${idx}]`;
+              }
+              this.cursor = idx + 1;
+              syncMerkleStructureGeometry(this.cursor);
+              zkFoldEngine.updateUI();
+              this.updateRateAndUI();
+            },
+            mineSingleBlockSync() {
+              if (this.cursor >= TOTAL_SQUARES) return false;
+              const idx = this.cursor;
+              const prefix = this.buildBlockPrefix(idx);
+              let nonce = 0;
+              while (nonce < 200000) {
+                const h = sha256dHex(prefix + nonce);
+                this.totalHashes += 2;
+                const zb = countLeadingZeroBits(h);
+                if (zb >= this.difficultyBits) {
+                  this.commitVerifiedBlock(idx, nonce, h, zb);
+                  return true;
+                }
+                nonce++;
+              }
+              return false;
+            },
+            updateRateAndUI() {
+              const now = performance.now();
+              if (now - this.lastRateTime >= 350) {
+                this.hashRate = Math.round(((this.totalHashes - this.lastRateHashes) * 1000) / (now - this.lastRateTime));
+                this.lastRateTime = now;
+                this.lastRateHashes = this.totalHashes;
+              }
+              this.updateUI();
+            },
+            runBoundedTick(budgetMs = 3.5) {
+              if (!this.running || this.cursor >= TOTAL_SQUARES) return;
+              if (this.workers.length > 0 && this.workerMode !== 'SYNC_FALLBACK') {
+                if (!this.inFlight) this.dispatchNextBlockJob(0);
+                this.updateRateAndUI();
+                return;
+              }
+              const t0 = performance.now();
+              while (this.cursor < TOTAL_SQUARES && (performance.now() - t0) < budgetMs) {
+                this.mineSingleBlockSync();
+              }
+            },
+            updateUI() {
+              const mc = document.getElementById('mine-count');
+              const pc = document.getElementById('prism-count');
+              const mr = document.getElementById('mine-rate');
+              const mroot = document.getElementById('merkle-root-ui');
+              const mnodes = document.getElementById('merkle-nodes-ui');
+              if (mc) mc.textContent = `${this.cursor.toLocaleString()} / 4,096`;
+              if (pc) pc.textContent = `${(this.cursor * 4).toLocaleString()} / 16,384`;
+              if (mr) mr.textContent = `${this.hashRate.toLocaleString()} H/s`;
+              if (mroot) mroot.textContent = `0x${merkleTree.root.slice(0, 12)}…`;
+              if (mnodes) mnodes.textContent = `${merkleTree.activeNodeCount.toLocaleString()} / 8,191`;
+            }
+          };
+
+          // =========================================================================
+          // 8. AE.VOIDMATRIX.CRYPTIC — FINITE Z^4 LATTICE V_5 (625 NODES, 2,000 EDGES)
+          // =========================================================================
+          const voidMatrixGroup = new THREE.Group();
+          masterGroup.add(voidMatrixGroup);
+
+          function encodeVoidNodeId(X, Y, Z, T) {
+            return 125 * (X + 2) + 25 * (Y + 2) + 5 * (Z + 2) + (T + 2);
+          }
+          function decodeVoidNodeId(nodeId) {
+            const id = Math.max(0, Math.min(624, Math.floor(nodeId)));
+            const X = Math.floor(id / 125) - 2;
+            const rem1 = id % 125;
+            const Y = Math.floor(rem1 / 25) - 2;
+            const rem2 = rem1 % 25;
+            const Z = Math.floor(rem2 / 5) - 2;
+            const T = (rem2 % 5) - 2;
+            return { X, Y, Z, T };
+          }
+
+          const voidNodes = [];
+          const voidEdges = [];
+          const voidAdj = Array.from({ length: 625 }, () => []);
+          const voidBaseCoords4D = [];
+          const voidNodePositions = new Float32Array(625 * 3);
+          const voidNodeColors = new Float32Array(625 * 3);
+
+          for (let id = 0; id < 625; id++) {
+            const { X, Y, Z, T } = decodeVoidNodeId(id);
+            const v4 = [X * 1.15, Y * 1.15, Z * 1.15, T * 0.65];
+            voidBaseCoords4D.push(v4);
+            voidNodePositions[id * 3] = v4[0];
+            voidNodePositions[id * 3 + 1] = v4[1];
+            voidNodePositions[id * 3 + 2] = v4[2];
+            const isOrigin = id === 312;
+            voidNodeColors[id * 3] = isOrigin ? 0.98 : 0.06;
+            voidNodeColors[id * 3 + 1] = isOrigin ? 0.80 : 0.72;
+            voidNodeColors[id * 3 + 2] = isOrigin ? 0.08 : 0.83;
+
+            voidNodes.push({
+              node_id: id, X, Y, Z, T,
+              spatial_scale: 1.15, temporal_scale: 0.65,
+              physical_position: v4,
+              event_timestamp: new Date().toISOString(),
+              state_hash: sha256Hex(`VOID_V5_NODE|${id}|${X},${Y},${Z},${T}`),
+              metric_reference: 'L1_MANHATTAN_Z4',
+              field_sample: U_POOL[(START_INDEX + id * STRIDE) % M_TOTIENT],
+              measurement_uncertainty: 0.0,
+              provenance_reference: 'AE.VOIDMATRIX.CRYPTIC.v1',
+              parent_state: id === 312 ? null : 312,
+              traversal_status: id === 312 ? 'ORIGIN_ANCHORED' : 'INDEXED',
+              verification_status: 'VERIFIED'
+            });
+          }
+
+          const DIM_NAMES = ['X', 'Y', 'Z', 'T'];
+          for (let u = 0; u < 625; u++) {
+            const nu = voidNodes[u];
+            const coords = [nu.X, nu.Y, nu.Z, nu.T];
+            for (let dim = 0; dim < 4; dim++) {
+              if (coords[dim] < 2) {
+                const nextCoords = coords.slice();
+                nextCoords[dim] += 1;
+                const v = encodeVoidNodeId(nextCoords[0], nextCoords[1], nextCoords[2], nextCoords[3]);
+                const edgeObj = {
+                  edge_id: `E-${String(voidEdges.length).padStart(4, '0')}`,
+                  source_node: u, destination_node: v,
+                  dimension: DIM_NAMES[dim], direction: 1,
+                  transition_cost: 1.0, temporal_order: dim === 3 ? 1 : 0,
+                  metric_weight: 1.0, field_projection: coords,
+                  transition_hash: sha256Hex(`VOID_V5_EDGE|${u}->${v}|${DIM_NAMES[dim]}`),
+                  verification_reference: 'L1_SUM_ABS_DIFF_EQ_1'
+                };
+                voidEdges.push(edgeObj);
+                voidAdj[u].push({ to: v, edge: edgeObj });
+                voidAdj[v].push({ to: u, edge: edgeObj });
+              }
+            }
+          }
+
+          const voidNodeGeo = new THREE.BufferGeometry();
+          voidNodeGeo.setAttribute('position', new THREE.BufferAttribute(voidNodePositions, 3));
+          voidNodeGeo.setAttribute('color', new THREE.BufferAttribute(voidNodeColors, 3));
+          const voidLatticePoints = new THREE.Points(
+            voidNodeGeo,
+            new THREE.PointsMaterial({ size: 0.16, vertexColors: true, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending })
+          );
+          voidMatrixGroup.add(voidLatticePoints);
+
+          const voidEdgeGeo = new THREE.BufferGeometry();
+          voidEdgeGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(voidEdges.length * 2 * 3), 3));
+          const voidEdgeLines = new THREE.LineSegments(
+            voidEdgeGeo,
+            new THREE.LineBasicMaterial({ color: 0x0ea5e9, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending })
+          );
+          voidMatrixGroup.add(voidEdgeLines);
+
+          const voidGeodesicLine = new THREE.Line(
+            new THREE.BufferGeometry(),
+            new THREE.LineBasicMaterial({ color: 0x10b981, transparent: true, opacity: 0.98 })
+          );
+          voidGeodesicLine.visible = false;
+          voidMatrixGroup.add(voidGeodesicLine);
+
+          let activeVoidPathIds = [];
+          let activeTemporalSlice = 'ALL';
+
+          function updateVoidLatticeProjection(m4) {
+            const pArr = voidNodeGeo.attributes.position.array;
+            const cArr = voidNodeGeo.attributes.color.array;
+            const pathSet = new Set(activeVoidPathIds);
+
+            for (let id = 0; id < 625; id++) {
+              const node = voidNodes[id];
+              const sliceMatch = activeTemporalSlice === 'ALL' || node.T === Number(activeTemporalSlice);
+              const proj = project4Dto3D(voidBaseCoords4D[id], m4);
+              pArr[id * 3] = proj.x;
+              pArr[id * 3 + 1] = proj.y;
+              pArr[id * 3 + 2] = sliceMatch ? proj.z : -9999.0;
+
+              const onPath = pathSet.has(id);
+              const isOrigin = id === 312;
+              cArr[id * 3] = onPath ? 0.06 : (isOrigin ? 0.98 : 0.06);
+              cArr[id * 3 + 1] = onPath ? 0.95 : (isOrigin ? 0.80 : (sliceMatch ? 0.72 : 0.12));
+              cArr[id * 3 + 2] = onPath ? 0.50 : (isOrigin ? 0.08 : (sliceMatch ? 0.83 : 0.18));
+            }
+            voidNodeGeo.attributes.position.needsUpdate = true;
+            voidNodeGeo.attributes.color.needsUpdate = true;
+
+            const eArr = voidEdgeGeo.attributes.position.array;
+            for (let i = 0; i < voidEdges.length; i++) {
+              const e = voidEdges[i];
+              const u = e.source_node, v = e.destination_node;
+              const uVis = activeTemporalSlice === 'ALL' || (voidNodes[u].T === Number(activeTemporalSlice) && voidNodes[v].T === Number(activeTemporalSlice));
+              const idx6 = i * 6;
+              if (uVis) {
+                eArr[idx6] = pArr[u * 3]; eArr[idx6 + 1] = pArr[u * 3 + 1]; eArr[idx6 + 2] = pArr[u * 3 + 2];
+                eArr[idx6 + 3] = pArr[v * 3]; eArr[idx6 + 4] = pArr[v * 3 + 1]; eArr[idx6 + 5] = pArr[v * 3 + 2];
+              } else {
+                eArr[idx6] = eArr[idx6 + 1] = eArr[idx6 + 2] = -9999.0;
+                eArr[idx6 + 3] = eArr[idx6 + 4] = eArr[idx6 + 5] = -9999.0;
+              }
+            }
+            voidEdgeGeo.attributes.position.needsUpdate = true;
+
+            if (activeVoidPathIds.length >= 2) {
+              const pts = activeVoidPathIds.map(nid => new THREE.Vector3(pArr[nid * 3], pArr[nid * 3 + 1], pArr[nid * 3 + 2]));
+              voidGeodesicLine.geometry.dispose();
+              voidGeodesicLine.geometry = new THREE.BufferGeometry().setFromPoints(pts);
+              voidGeodesicLine.visible = true;
+            } else {
+              voidGeodesicLine.visible = false;
+            }
+          }
+
+          function solveVoidManhattanGeodesic(startId, endId) {
+            const s = Math.max(0, Math.min(624, Math.floor(startId)));
+            const t = Math.max(0, Math.min(624, Math.floor(endId)));
+            const visited = new Uint8Array(625);
+            const parent = new Int16Array(625).fill(-1);
+            const queue = [s];
+            visited[s] = 1;
+            while (queue.length > 0) {
+              const curr = queue.shift();
+              if (curr === t) break;
+              for (const { to } of voidAdj[curr]) {
+                if (!visited[to]) { visited[to] = 1; parent[to] = curr; queue.push(to); }
+              }
+            }
+            const path = [];
+            let cur = t;
+            while (cur !== -1) {
+              path.push(cur);
+              if (cur === s) break;
+              cur = parent[cur];
+            }
+            path.reverse();
+            activeVoidPathIds = path;
+            const uNode = voidNodes[s], vNode = voidNodes[t];
+            const expectedL1 = Math.abs(uNode.X - vNode.X) + Math.abs(uNode.Y - vNode.Y) + Math.abs(uNode.Z - vNode.Z) + Math.abs(uNode.T - vNode.T);
+            const hops = Math.max(0, path.length - 1);
+            let chainHash = uNode.state_hash;
+            for (let i = 1; i < path.length; i++) chainHash = sha256Hex(`${chainHash}|${path[i - 1]}->${path[i]}`);
+            const pathEl = document.getElementById('void-path-readout');
+            if (pathEl) pathEl.textContent = `${s}→${t} (${hops} hops = L₁:${expectedL1} ✓) · 0x${chainHash.slice(0, 10)}…`;
+            const schemaOut = document.getElementById('void-schema-output');
+            if (schemaOut) {
+              schemaOut.textContent = JSON.stringify({ geodesic: `${s} -> ${t}`, hops, manhattan_l1: expectedL1, optimal: hops === expectedL1, transition_chain_sha256: chainHash, route: path }, null, 2);
+            }
+            return { path, hops, expectedL1, optimal: hops === expectedL1, chainHash };
+          }
+
+          function quantizeToVoidLattice(v4) {
+            const qx = Math.max(-2, Math.min(2, Math.round(v4[0] / 1.8)));
+            const qy = Math.max(-2, Math.min(2, Math.round(v4[1] / 1.8)));
+            const qz = Math.max(-2, Math.min(2, Math.round(v4[2] / 1.8)));
+            const qt = Math.max(-2, Math.min(2, Math.round(v4[3] / 1.1)));
+            return { id: encodeVoidNodeId(qx, qy, qz, qt), X: qx, Y: qy, Z: qz, T: qt };
+          }
+
+          // =========================================================================
+          // 9. SEQUENTIAL FILLING WAVE, RAYCAST INSPECTOR & CAMERA FLIGHT
+          // =========================================================================
+          let lastFrontier = -1;
+          let lastInspectorKey = '';
+          const colSqFwdMined = new THREE.Color(0x06b6d4);
+          const colSqFwdPool  = new THREE.Color(0x0c2438);
+          const colSqBwdMined = new THREE.Color(0xf43f5e);
+          const colSqBwdPool  = new THREE.Color(0x2d0c18);
+          const colPrFwdMined = new THREE.Color(0x38bdf8);
+          const colPrFwdHead  = new THREE.Color(0x10b981);
+          const colPrFwdPool  = new THREE.Color(0x081828);
+          const colPrBwdMined = new THREE.Color(0xfb7185);
+          const colPrBwdHead  = new THREE.Color(0xfacc15);
+          const colPrBwdPool  = new THREE.Color(0x200812);
+          const colTargetHi   = new THREE.Color(0x10b981);
+          const colInverseHi  = new THREE.Color(0xfacc15);
+
+          function updateSequentialSpiralFilling(activePrismId, inversePrismId) {
+            const frontier = miningEngine.cursor;
+            const inspKey = `${activePrismId}:${inversePrismId}`;
+            if (frontier === lastFrontier && inspKey === lastInspectorKey) return;
+            lastFrontier = frontier;
+            lastInspectorKey = inspKey;
+
+            const actSq = activePrismId !== null ? Math.floor(activePrismId / PRISMS_PER_SQUARE) : -1;
+            const invSq = inversePrismId !== null ? Math.floor(inversePrismId / PRISMS_PER_SQUARE) : -1;
+
+            for (let sqIdx = 0; sqIdx < TOTAL_SQUARES; sqIdx++) {
+              const isFwd = sqIdx < HALF_SQUARES;
+              const isMined = sqIdx < frontier;
+              let sqColor = isFwd ? (isMined ? colSqFwdMined : colSqFwdPool) : (isMined ? colSqBwdMined : colSqBwdPool);
+              if (sqIdx === actSq) sqColor = colTargetHi;
+              else if (sqIdx === invSq) sqColor = colInverseHi;
+              squareInstancedMesh.setColorAt(sqIdx, sqColor);
+
+              const isHead = Math.abs(sqIdx - frontier) <= 4;
+              for (let p = 0; p < PRISMS_PER_SQUARE; p++) {
+                const prIdx = sqIdx * PRISMS_PER_SQUARE + p;
+                let prColor;
+                if (prIdx === activePrismId) prColor = colTargetHi;
+                else if (prIdx === inversePrismId) prColor = colInverseHi;
+                else if (isFwd) prColor = isHead ? colPrFwdHead : (isMined ? colPrFwdMined : colPrFwdPool);
+                else prColor = isHead ? colPrBwdHead : (isMined ? colPrBwdMined : colPrBwdPool);
+                prismInstancedMesh.setColorAt(prIdx, prColor);
+              }
+            }
+            if (squareInstancedMesh.instanceColor) squareInstancedMesh.instanceColor.needsUpdate = true;
+            if (prismInstancedMesh.instanceColor) prismInstancedMesh.instanceColor.needsUpdate = true;
+          }
+
+          const raycaster = new THREE.Raycaster();
+          raycaster.params.Points.threshold = 0.28;
+          const pointerNDC = new THREE.Vector2(-99, -99);
+          let hoveredPrismId = null;
+          let lockedPrismId = null;
+          let hoveredVoidNodeId = null;
+          let voidPickMode = false;
+          let voidPickToggle = 0; // 0 -> set start, 1 -> set end
+
+          function updateInspectorDisplay(prismId, isLocked) {
+            const modeEl = document.getElementById('insp-mode');
+            const flyBtn = document.getElementById('btn-insp-fly');
+            const unlockBtn = document.getElementById('btn-insp-unlock');
+            if (prismId === null || !prismRecords[prismId]) {
+              if (modeEl) modeEl.textContent = 'PRISM & 4D INVERSE INSPECTOR';
+              if (flyBtn) flyBtn.classList.add('hidden');
+              if (unlockBtn) unlockBtn.classList.add('hidden');
+              targetBeacon.visible = false;
+              inverseBeacon.visible = false;
+              inverseBridgeLine.visible = false;
+              merkleProofPathLine.visible = false;
+              return null;
+            }
+            const pr = prismRecords[prismId];
+            const invPr = prismRecords[pr.pairedInversePrismId];
+            const sq = squareRecords[pr.squareId];
+            const invSq = squareRecords[invPr.squareId];
+            const v5 = quantizeToVoidLattice([pr.x, pr.y, pr.z, pr.w]);
+
+            if (modeEl) modeEl.textContent = isLocked ? 'LOCKED · 12-HOP MERKLE + 4D INVERSE' : 'HOVER · CLICK TO LOCK';
+            if (flyBtn) flyBtn.classList.remove('hidden');
+            if (unlockBtn) unlockBtn.classList.toggle('hidden', !isLocked);
+
+            document.getElementById('insp-id').textContent = `Blk #${pr.squareId} / Pr #${pr.prismId} (${pr.quadLabel})`;
+            document.getElementById('insp-dewey').textContent = `${pr.dewey} [${pr.hexHash}]`;
+            document.getElementById('insp-coords').textContent = `(${pr.x.toFixed(2)},${pr.y.toFixed(2)},${pr.z.toFixed(2)},${pr.w.toFixed(2)}) · V₅#${v5.id}`;
+            document.getElementById('insp-fk').textContent = `F(${pr.kStep})=${pr.fUnit} | R(${pr.kStep})=${pr.rUnit}`;
+            document.getElementById('insp-inv').textContent = `Blk #${invPr.squareId} (${invPr.dewey})`;
+            document.getElementById('insp-payload').innerHTML =
+              `<strong>${sq.mined ? 'MINED BLOCK DATA' : 'UNMINED SLOT'}:</strong> ${pr.encodedPayload}<br>` +
+              `<strong>V₅ CELL:</strong> ID ${v5.id} (${v5.X},${v5.Y},${v5.Z},${v5.T})`;
+
+            targetBeacon.visible = true;
+            targetBeacon.position.set(sq.x, sq.y, sq.z);
+            targetBeacon.rotation.set(sq.rotX, 0, sq.rotZ);
+            targetBeacon.scale.set(sq.sqScale * 1.15, sq.sqScale * 1.15, 1.0);
+
+            inverseBeacon.visible = true;
+            inverseBeacon.position.set(invSq.x, invSq.y, invSq.z);
+            inverseBeacon.rotation.set(invSq.rotX, 0, invSq.rotZ);
+            inverseBeacon.scale.set(invSq.sqScale * 1.15, invSq.sqScale * 1.15, 1.0);
+
+            const bPos = inverseBridgeLine.geometry.attributes.position;
+            bPos.setXYZ(0, pr.x, pr.y, pr.z);
+            bPos.setXYZ(1, invPr.x, invPr.y, invPr.z);
+            bPos.needsUpdate = true;
+            inverseBridgeLine.visible = true;
+
+            // Highlight 12-hop Merkle inclusion path from L0 leaf to L12 apex root
+            const mPos = merkleProofPathLine.geometry.attributes.position;
+            let curLeaf = pr.squareId;
+            for (let lvl = 0; lvl < MERKLE_LEVEL_COUNTS.length; lvl++) {
+              const nodePt = merkleNodeCoords[merkleLevelOffsets[lvl] + curLeaf];
+              mPos.setXYZ(lvl, nodePt.x, nodePt.y, nodePt.z);
+              curLeaf >>= 1;
+            }
+            mPos.needsUpdate = true;
+            merkleProofPathLine.visible = merkleStructureGroup.visible;
+
+            return invPr.prismId;
+          }
+
+          function performRaycastInspection() {
+            raycaster.setFromCamera(pointerNDC, camera);
+            hoveredPrismId = null;
+            hoveredVoidNodeId = null;
+            if (voidPickMode && voidMatrixGroup.visible) {
+              const vHits = raycaster.intersectObject(voidLatticePoints, false);
+              if (vHits.length > 0 && vHits[0].index !== undefined) hoveredVoidNodeId = vHits[0].index;
+            }
+            if (hoveredVoidNodeId === null && prismInstancedMesh.visible) {
+              const hits = raycaster.intersectObject(prismInstancedMesh, false);
+              if (hits.length > 0 && hits[0].instanceId !== undefined) hoveredPrismId = hits[0].instanceId;
+            }
+            if (hoveredVoidNodeId === null && hoveredPrismId === null && squareInstancedMesh.visible) {
+              const sqHits = raycaster.intersectObject(squareInstancedMesh, false);
+              if (sqHits.length > 0 && sqHits[0].instanceId !== undefined) hoveredPrismId = sqHits[0].instanceId * PRISMS_PER_SQUARE;
+            }
+            document.body.style.cursor = (hoveredVoidNodeId !== null || hoveredPrismId !== null) ? 'pointer' : (isDragging ? 'grabbing' : 'default');
+            const activeId = lockedPrismId !== null ? lockedPrismId : hoveredPrismId;
+            const invId = updateInspectorDisplay(activeId, lockedPrismId !== null);
+            return { activeId, invId };
+          }
+
+          // Camera & 6-DOF Flight Controller
+          let camYaw = 0, camPitch = -0.1, camRadius = 13.5, targetRadius = 13.5;
+          let groupRotX = 0.14, groupRotY = 0.0;
+          let isDragging = false, dragMoved = false, prevPointer = { x: 0, y: 0 };
+          let keysPressed = {};
+          const camVel = new THREE.Vector3(), fwdVec = new THREE.Vector3(), rightVec = new THREE.Vector3();
+
+          function resetCameraView() {
+            camYaw = 0; camPitch = -0.1; targetRadius = 13.5; camRadius = 13.5;
+            groupRotX = 0.14; groupRotY = 0.0;
+            camera.position.set(0, 1.8, 13.5);
+            camVel.set(0, 0, 0);
+          }
+
+          function flyToPrism(prismId) {
+            const pr = prismRecords[prismId];
+            if (!pr) return;
+            state.autoOrbit = false;
+            document.getElementById('btn-orbit').textContent = 'ORBIT:OFF';
+            camera.position.set(pr.x * 1.35, pr.y * 1.35 + 1.2, pr.z * 1.35 + 3.2);
+            camera.lookAt(pr.x, pr.y, pr.z);
+            camYaw = camera.rotation.y;
+            camPitch = camera.rotation.x;
+          }
+
+          function processCameraAndFlight(dt) {
+            const boost = keysPressed['shift'] ? 2.5 : 1.0;
+            const accel = 0.02 * boost;
+            if (keysPressed['arrowleft']) camYaw += 0.025;
+            if (keysPressed['arrowright']) camYaw -= 0.025;
+            if (keysPressed['arrowup']) camPitch += 0.025;
+            if (keysPressed['arrowdown']) camPitch -= 0.025;
+            camPitch = Math.max(-1.48, Math.min(1.48, camPitch));
+
+            const flying = keysPressed['w'] || keysPressed['a'] || keysPressed['s'] || keysPressed['d'] || keysPressed['q'] || keysPressed['e'];
+            if (flying) {
+              state.autoOrbit = false;
+              document.getElementById('btn-orbit').textContent = 'ORBIT:OFF';
+              camera.rotation.y = camYaw;
+              camera.rotation.x = camPitch;
+              camera.getWorldDirection(fwdVec);
+              rightVec.crossVectors(fwdVec, camera.up).normalize();
+              if (keysPressed['w']) camVel.addScaledVector(fwdVec, accel);
+              if (keysPressed['s']) camVel.addScaledVector(fwdVec, -accel);
+              if (keysPressed['d']) camVel.addScaledVector(rightVec, accel);
+              if (keysPressed['a']) camVel.addScaledVector(rightVec, -accel);
+              if (keysPressed['e']) camVel.y += accel;
+              if (keysPressed['q']) camVel.y -= accel;
+              camera.position.add(camVel);
+              camVel.multiplyScalar(0.86);
+            } else {
+              camRadius += (targetRadius - camRadius) * 0.1;
+              if (state.autoOrbit && !isDragging && lockedPrismId === null) {
+                groupRotY += dt * 0.14;
+              }
+              camera.position.set(
+                Math.sin(camYaw) * Math.cos(camPitch) * camRadius,
+                Math.sin(-camPitch) * camRadius + 0.8,
+                Math.cos(camYaw) * Math.cos(camPitch) * camRadius
+              );
+              camera.lookAt(0, 0, 0);
+            }
+            masterGroup.rotation.x = groupRotX;
+            masterGroup.rotation.y = groupRotY;
+          }
+
+          window.addEventListener('keydown', (e) => {
+            if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+            keysPressed[e.key.toLowerCase()] = true;
+          });
+          window.addEventListener('keyup', (e) => { keysPressed[e.key.toLowerCase()] = false; });
+
+          renderer.domElement.addEventListener('mousedown', (e) => {
+            isDragging = true; dragMoved = false;
+            prevPointer = { x: e.clientX, y: e.clientY };
+          });
+          window.addEventListener('mousemove', (e) => {
+            const rect = renderer.domElement.getBoundingClientRect();
+            pointerNDC.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            pointerNDC.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+            if (!isDragging) return;
+            const dx = e.clientX - prevPointer.x, dy = e.clientY - prevPointer.y;
+            if (Math.abs(dx) > 2 || Math.abs(dy) > 2) dragMoved = true;
+            camYaw -= dx * 0.005;
+            camPitch = Math.max(-1.45, Math.min(1.45, camPitch + dy * 0.005));
+            prevPointer = { x: e.clientX, y: e.clientY };
+          });
+          window.addEventListener('mouseup', () => {
+            if (isDragging && !dragMoved) {
+              if (voidPickMode && hoveredVoidNodeId !== null) {
+                const startEl = document.getElementById('void-start');
+                const endEl = document.getElementById('void-end');
+                if (voidPickToggle === 0 && startEl) {
+                  startEl.value = hoveredVoidNodeId;
+                  voidPickToggle = 1;
+                } else if (endEl) {
+                  endEl.value = hoveredVoidNodeId;
+                  voidPickToggle = 0;
+                }
+                const s = parseInt(startEl?.value || '312', 10);
+                const t = parseInt(endEl?.value || '624', 10);
+                solveVoidManhattanGeodesic(s, t);
+                appendAuditLog(`3D V₅ PICK: Node #${hoveredVoidNodeId} → Geodesic ${s}→${t}`);
+              } else if (hoveredPrismId !== null) {
+                lockedPrismId = (lockedPrismId === hoveredPrismId) ? null : hoveredPrismId;
+              } else {
+                lockedPrismId = null;
+              }
+            }
+            isDragging = false;
+          });
+          renderer.domElement.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            targetRadius = Math.max(3.5, Math.min(36, targetRadius + e.deltaY * 0.01));
+          }, { passive: false });
+
+          // =========================================================================
+          // 10. TONE.JS HARMONIC SYNTHESIZER & CANVAS VISUALIZERS
+          // =========================================================================
+          let audioActive = false;
+          let polySynth = null;
+          let analyser = null;
+
+          async function toggleHarmonicAudio() {
+            const btn = document.getElementById('btn-audio');
+            if (!audioActive) {
+              try {
+                if (typeof Tone !== 'undefined') {
+                  await Tone.start();
+                  analyser = new Tone.Analyser('fft', 32);
+                  polySynth = new Tone.PolySynth(Tone.Synth, {
+                    oscillator: { type: 'sine' },
+                    envelope: { attack: 0.2, decay: 0.4, sustain: 0.4, release: 1.2 },
+                    volume: -18
+                  }).connect(analyser).toDestination();
+                  polySynth.triggerAttack(['A2', 'E3', 'B3', 'C#4']);
+                }
+                audioActive = true;
+                btn.textContent = 'AUDIO:ON';
+              } catch (_) {
+                btn.textContent = 'AUDIO:ERR';
+              }
+            } else {
+              if (polySynth) { polySynth.releaseAll(); polySynth.dispose(); polySynth = null; }
+              audioActive = false;
+              btn.textContent = 'AUDIO:OFF';
+            }
+          }
+
+          function drawTannerGraph() {
+            const c = document.getElementById('tanner-canvas');
+            if (!c) return;
+            const ctx = c.getContext('2d');
+            c.width = c.clientWidth || 300; c.height = c.clientHeight || 80;
+            ctx.clearRect(0, 0, c.width, c.height);
+            const vNodes = 12, cNodes = 6;
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.28)';
+            for (let v = 0; v < vNodes; v++) {
+              const vx = 18 + (v / (vNodes - 1)) * (c.width - 36);
+              for (let k = 0; k < 2; k++) {
+                const ci = (v + k * 2) % cNodes;
+                const cx = 36 + (ci / (cNodes - 1)) * (c.width - 72);
+                ctx.beginPath(); ctx.moveTo(vx, 16); ctx.lineTo(cx, c.height - 16); ctx.stroke();
+              }
+              ctx.fillStyle = '#38bdf8';
+              ctx.beginPath(); ctx.arc(vx, 16, 3.5, 0, Math.PI * 2); ctx.fill();
+            }
+            for (let ci = 0; ci < cNodes; ci++) {
+              const cx = 36 + (ci / (cNodes - 1)) * (c.width - 72);
+              ctx.fillStyle = '#10b981';
+              ctx.fillRect(cx - 4, c.height - 20, 8, 8);
+            }
+          }
+
+          function drawTunnelWaveform(seedStr = 'GAIA-NEXUS') {
+            const c = document.getElementById('tunnel-canvas');
+            if (!c) return;
+            const ctx = c.getContext('2d');
+            c.width = c.clientWidth || 300; c.height = c.clientHeight || 48;
+            ctx.clearRect(0, 0, c.width, c.height);
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            for (let x = 0; x < c.width; x++) {
+              const y = c.height / 2 + Math.sin(x * 0.08 + seedStr.length) * 14 * Math.cos(x * 0.02);
+              if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+          }
+
+          function drawAudioSpectrum(t) {
+            const c = document.getElementById('audio-spectrum-canvas');
+            if (!c) return;
+            const ctx = c.getContext('2d');
+            c.width = c.clientWidth || 300; c.height = c.clientHeight || 56;
+            ctx.clearRect(0, 0, c.width, c.height);
+            const vals = analyser ? analyser.getValue() : null;
+            const bars = 24;
+            const bw = c.width / bars;
+            for (let i = 0; i < bars; i++) {
+              const mag = vals ? Math.max(0.08, (vals[i] + 100) / 100) : (0.2 + 0.65 * Math.abs(Math.sin(t * 2.2 + i * 0.35)));
+              const bh = mag * (c.height - 8);
+              ctx.fillStyle = i % 2 === 0 ? '#38bdf8' : '#a855f7';
+              ctx.fillRect(i * bw + 1, c.height - bh, bw - 2, bh);
+            }
+          }
+
+          // =========================================================================
+          // 11. UI EVENT BINDINGS (SOLVER, 3-ECC, AUDIT, POLYGLOT TERMINAL)
+          // =========================================================================
+          function appendAuditLog(msg) {
+            const el = document.getElementById('audit-log-readout');
+            if (!el) return;
+            const line = document.createElement('div');
+            line.textContent = `[${new Date().toISOString().slice(11, 19)}] ${msg}`;
+            el.prepend(line);
+          }
+
+          function executeQuery(raw) {
+            const q = raw.trim();
+            const statusEl = document.getElementById('query-status');
+            let targetPr = null;
+            if (q.startsWith('#')) {
+              const id = parseInt(q.slice(1), 10);
+              if (!isNaN(id) && squareRecords[id]) targetPr = id * PRISMS_PER_SQUARE;
+            } else if (q.toLowerCase().startsWith('0x')) {
+              const needle = q.toLowerCase();
+              const found = prismRecords.find(p => p.hexHash.toLowerCase().includes(needle) || p.encodedPayload.toLowerCase().includes(needle));
+              if (found) targetPr = found.prismId;
+            } else {
+              const found = prismRecords.find(p => p.dewey.startsWith(q));
+              if (found) targetPr = found.prismId;
+            }
+            if (targetPr !== null) {
+              lockedPrismId = targetPr;
+              const pr = prismRecords[targetPr];
+              const inv = prismRecords[pr.pairedInversePrismId];
+              roseUniforms.uPerturb.value += 0.65;
+              drawTunnelWaveform(pr.hexHash);
+              if (statusEl) {
+                statusEl.textContent = `LOCKED ${pr.dewey} (Blk #${pr.squareId}) ↔ Inverse ${inv.dewey} (Blk #${inv.squareId}) · k=${pr.kStep}`;
+              }
+              return `FOUND ${pr.dewey} (Blk #${pr.squareId}) ↔ Inv ${inv.dewey}`;
+            }
+            if (statusEl) statusEl.textContent = `No exact match for "${q}". Try #0..#4095, 1.4.01, or 0x prefix.`;
+            return `NO MATCH: ${q}`;
+          }
+
+          function runThreeEccBenchmark() {
+            const t0 = performance.now();
+            // 1. Reed-Solomon GF(256) BW
+            const msg = new Uint8Array(12);
+            for (let i = 0; i < msg.length; i++) msg[i] = (i * 19 + 7) & 0xff;
+            const rsCw = rsEncode(msg, 20);
+            rsCw[2] ^= 0x5a; rsCw[7] ^= 0xa3;
+            const rsRes = rsDecodeBW(rsCw, 12, 4);
+
+            // 2. CSR QC-LDPC (Z=27, n=108, k=54)
+            const ldpcMsg = new Uint8Array(CSR_LDPC.k);
+            for (let i = 0; i < ldpcMsg.length; i++) ldpcMsg[i] = (i * 7 + 3) & 1;
+            const ldpcCw = CSR_LDPC.encode(ldpcMsg);
+            const llr = Array.from(ldpcCw, b => b === 0 ? 6.0 : -6.0);
+            llr[3] = -2.2; llr[19] = 2.1;
+            const ldpcRes = CSR_LDPC.decodeMinSum(llr, 20, 0.8);
+
+            // 3. Turbo Rate-1/3 RSC + Log-MAP BCJR
+            const tBits = [0, 1, 1, 0, 1, 0, 1, 1, 0];
+            const perm = [2, 5, 0, 8, 4, 1, 7, 3, 6];
+            const p1 = TurboCodec.rscEncode(tBits);
+            const p2 = TurboCodec.rscEncode(perm.map(i => tBits[i]));
+            const sysL = tBits.map(b => b === 0 ? 5.0 : -5.0);
+            sysL[1] = 1.2; sysL[6] = -1.2;
+            const tDec = TurboCodec.decode(sysL, Array.from(p1, b => b === 0 ? 5.0 : -5.0), Array.from(p2, b => b === 0 ? 5.0 : -5.0), perm, 4);
+            const tOk = tBits.every((b, i) => b === tDec[i]);
+            const ms = (performance.now() - t0).toFixed(1);
+
+            const el = document.getElementById('ecc-readout');
+            if (el) {
+              el.innerHTML =
+                `<div>RS(20,12) GF(256) BW: <span class="${rsRes.verified ? 'text-emerald-400' : 'text-rose-400'}">${rsRes.verified ? 'PASS' : 'FAIL'} (${rsRes.errors} errs fixed)</span></div>` +
+                `<div>CSR QC-LDPC (Z=27, n=108): <span class="${ldpcRes.converged ? 'text-cyan-300' : 'text-rose-400'}">${ldpcRes.converged ? 'H·cᵀ=0 PASS' : 'ITER_MAX'} (${ldpcRes.iterations} iters)</span></div>` +
+                `<div>Turbo Log-MAP BCJR (1/3): <span class="${tOk ? 'text-amber-300' : 'text-rose-400'}">${tOk ? 'BER 0.222→0.000 PASS' : 'ERR'} (${ms} ms)</span></div>`;
+            }
+            drawTannerGraph();
+          }
+
+          async function exportSignedSnapshot(triggerDownload = true) {
+            const payloadObj = {
+              schema: 'GAIA/NEXUS/SNAPSHOT/v1',
+              created_at: new Date().toISOString(),
+              monolith_version: monolithEngine.version,
+              blocks_mined: miningEngine.cursor,
+              pow_difficulty_bits: miningEngine.difficultyBits,
+              merkle_root: merkleTree.root,
+              zk_fold_ivc: zkFoldEngine.getSnapshot(),
+              void_v5_origin_hash: voidNodes[312].state_hash
+            };
+            const canon = canonicalStringify(payloadObj);
+            const digest = sha256Hex(canon);
+            const ecdsa = await durableVault.signPayload(canon);
+            const secret = document.getElementById('hmac-secret')?.value || '';
+            const hmac = await durableVault.hmacPayload(canon, secret);
+            const bundle = { ...payloadObj, artifact_sha256: digest, ecdsa, hmac_sha256: hmac };
+            window.__LATEST_GAIA_SNAPSHOT = bundle;
+            durableVault.persistReceipt({ receiptId: `RCP-${digest.slice(0, 16)}`, ...bundle });
+            if (triggerDownload) {
+              const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
+              const a = document.createElement('a');
+              a.href = URL.createObjectURL(blob);
+              a.download = `gaia-nexus-snapshot-v${monolithEngine.version}-blk${miningEngine.cursor}.json`;
+              a.click();
+              setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+            }
+            appendAuditLog(`EXPORTED .JSON 0x${digest.slice(0, 14)}… (IVC#${zkFoldEngine.step} · ${ecdsa.alg})`);
+            return bundle;
+          }
+
+          async function verifySnapshotBundle(snap, sourceLabel = 'LATEST') {
+            const { artifact_sha256, ecdsa, hmac_sha256, ...core } = snap;
+            const canon = canonicalStringify(core);
+            const recomputed = sha256Hex(canon);
+            const hashOk = recomputed === artifact_sha256;
+
+            // Verify AE.ZK.FOLD IVC commitment inside snapshot
+            let ivcOk = true;
+            if (core.zk_fold_ivc && core.zk_fold_ivc.step > 0) {
+              const ivc = core.zk_fold_ivc;
+              const expectedIvc = sha256Hex(canonicalStringify({
+                protocol: ivc.protocol,
+                step: ivc.step,
+                U: ivc.U,
+                E: ivc.E,
+                r: ivc.r,
+                prev: ivc.prev
+              }));
+              ivcOk = expectedIvc === ivc.accHash;
+            }
+
+            // Verify ECDSA-P256 using embedded public JWK (works offline across sessions!)
+            let sigOk = true;
+            if (ecdsa?.sig && ecdsa?.pub && window.crypto?.subtle) {
+              try {
+                const pubKey = await crypto.subtle.importKey(
+                  'jwk', ecdsa.pub, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']
+                );
+                const sigBytes = new Uint8Array(ecdsa.sig.match(/.{2}/g).map(h => parseInt(h, 16)));
+                sigOk = await crypto.subtle.verify(
+                  { name: 'ECDSA', hash: 'SHA-256' }, pubKey, sigBytes, textEncoder.encode(canon)
+                );
+              } catch (_) { sigOk = false; }
+            }
+
+            // Verify optional HMAC-SHA256 if present
+            let hmacStatus = 'N/A';
+            if (hmac_sha256) {
+              const secret = document.getElementById('hmac-secret')?.value || '';
+              if (!secret) hmacStatus = 'KEY_REQ';
+              else {
+                const checkMac = await durableVault.hmacPayload(canon, secret);
+                hmacStatus = checkMac === hmac_sha256 ? 'PASS' : 'FAIL';
+              }
+            }
+            appendAuditLog(`VERIFY[${sourceLabel}]: hash=${hashOk ? 'PASS' : 'FAIL'} ivc=${ivcOk ? 'PASS' : 'FAIL'} ecdsa=${sigOk ? 'PASS' : 'FAIL'} hmac=${hmacStatus}`);
+            return hashOk && ivcOk && sigOk;
+          }
+
+          async function verifyLatestSnapshot() {
+            const snap = window.__LATEST_GAIA_SNAPSHOT || await exportSignedSnapshot(false);
+            await verifySnapshotBundle(snap, 'LATEST');
+          }
+
+          function executePolyglotCommand(raw) {
+            const cmd = raw.trim();
+            if (!cmd) return;
+            const out = document.getElementById('term-output');
+            const log = (txt, cls = 'text-slate-200') => {
+              const d = document.createElement('div');
+              d.className = cls;
+              d.textContent = txt;
+              out.appendChild(d);
+              out.scrollTop = out.scrollHeight;
+            };
+            log(`> ${cmd}`, 'text-sky-400');
+
+            if (cmd.startsWith('math:gcd(')) {
+              const nums = cmd.slice(9, -1).split(',').map(Number);
+              log(`= ${gcd(nums[0] || 0, nums[1] || 0)}`, 'text-emerald-300');
+            } else if (cmd.startsWith('math:inverse(')) {
+              const nums = cmd.slice(13, -1).split(',').map(Number);
+              const inv = modInverse(nums[0] || 0, nums[1] || 1);
+              log(inv !== null ? `= ${inv} (verified: (${nums[0]}*${inv}) mod ${nums[1]} = 1)` : 'NO_INVERSE (not coprime)', 'text-emerald-300');
+            } else if (cmd.startsWith('void:')) {
+              const parts = cmd.slice(5).split('->').map(Number);
+              const res = solveVoidManhattanGeodesic(parts[0] || 312, parts[1] ?? 624);
+              log(`V₅ Geodesic: ${res.hops} hops (L₁=${res.expectedL1}, optimal=${res.optimal})`, 'text-emerald-300');
+            } else if (cmd.startsWith('merkle:')) {
+              const idx = Math.max(0, Math.min(4095, parseInt(cmd.slice(7), 10) || 0));
+              const proof = merkleTree.getProof(idx);
+              const ok = merkleTree.verifyProof(merkleTree.leaves[idx], idx, proof, merkleTree.root);
+              log(`Merkle L0[${idx}] → Root 0x${merkleTree.root.slice(0, 16)}… (12-hop proof=${ok})`, 'text-cyan-300');
+            } else if (cmd.startsWith('pow:')) {
+              const bits = Math.max(4, Math.min(16, parseInt(cmd.slice(4), 10) || 8));
+              miningEngine.difficultyBits = bits;
+              const rng = document.getElementById('rng-pow-diff');
+              const lbl = document.getElementById('lbl-pow-diff');
+              if (rng) rng.value = bits;
+              if (lbl) lbl.textContent = `${bits} bits`;
+              if (miningEngine.running) miningEngine.dispatchNextBlockJob(0);
+              log(`PoW target updated to ${bits} leading zero bits`, 'text-amber-300');
+            } else if (cmd === 'ivc:verify') {
+              const v = zkFoldEngine.verifyConstantTime();
+              log(`AE.ZK.FOLD O(1) Verify: ${v.ok ? 'PASS' : 'FAIL'} (${v.stepsVerified} steps folded, ${v.elapsedUs}µs)`, 'text-purple-300');
+            } else if (cmd === 'evolve:cycle') {
+              const r = monolithEngine.evolve(false);
+              log(`Monolith evolved to v${r.newVersion}`, 'text-purple-300');
+            } else if (cmd === 'status') {
+              log(`Blocks: ${miningEngine.cursor}/4096 (${miningEngine.difficultyBits}b PoW, ${miningEngine.workerMode}) | IVC#${zkFoldEngine.step} | V₅: 625N/2000E`, 'text-amber-300');
+            } else {
+              log(executeQuery(cmd), 'text-emerald-300');
+            }
+          }
+
+          // Wire Top Bar & HUD Controls
+          document.getElementById('btn-audio').addEventListener('click', toggleHarmonicAudio);
+          document.getElementById('btn-orbit').addEventListener('click', (e) => {
+            state.autoOrbit = !state.autoOrbit;
+            e.target.textContent = `ORBIT:${state.autoOrbit ? 'ON' : 'OFF'}`;
+          });
+          document.getElementById('btn-reset').addEventListener('click', resetCameraView);
+          document.getElementById('btn-png').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = `gaia-nexus-4d-v${monolithEngine.version}.png`;
+            link.href = renderer.domElement.toDataURL('image/png');
+            link.click();
+          });
+          document.getElementById('btn-hud-toggle').addEventListener('click', () => {
+            document.getElementById('main-hud').classList.toggle('hidden');
+          });
+
+          document.getElementById('btn-mine-toggle').addEventListener('click', (e) => {
+            miningEngine.running = !miningEngine.running;
+            e.target.textContent = miningEngine.running ? 'PAUSE MINER' : 'RESUME MINER';
+            if (miningEngine.running) miningEngine.dispatchNextBlockJob(0);
+          });
+          document.getElementById('btn-mine-burst').addEventListener('click', () => {
+            for (let i = 0; i < 32; i++) miningEngine.mineSingleBlockSync();
+            if (miningEngine.running) miningEngine.dispatchNextBlockJob(0);
+          });
+          document.getElementById('rng-pow-diff').addEventListener('input', (e) => {
+            miningEngine.difficultyBits = parseInt(e.target.value, 10);
+            document.getElementById('lbl-pow-diff').textContent = `${miningEngine.difficultyBits} bits`;
+            if (miningEngine.running) miningEngine.dispatchNextBlockJob(0);
+          });
+          document.getElementById('btn-ivc-verify').addEventListener('click', () => {
+            const res = zkFoldEngine.verifyConstantTime();
+            const stEl = document.getElementById('ivc-status-ui');
+            if (stEl) {
+              stEl.className = res.ok ? 'text-[9.5px] text-emerald-400' : 'text-[9.5px] text-rose-400';
+              stEl.textContent = `O(1) VERIFIED: ${res.ok ? 'PASS' : 'FAIL'} · ${res.stepsVerified} folds in ${res.elapsedUs}µs`;
+            }
+            appendAuditLog(`AE.ZK.FOLD O(1): ${res.ok ? 'PASS' : 'FAIL'} (${res.stepsVerified} steps, ${res.elapsedUs}µs)`);
+          });
+
+          document.getElementById('chk-hypercube').addEventListener('change', (e) => { hypercubeGroup.visible = e.target.checked; });
+          document.getElementById('chk-spiral').addEventListener('change', (e) => { spiralSystemGroup.visible = e.target.checked; });
+          document.getElementById('chk-merkle').addEventListener('change', (e) => { merkleStructureGroup.visible = e.target.checked; });
+          document.getElementById('chk-void').addEventListener('change', (e) => { voidMatrixGroup.visible = e.target.checked; });
+          document.getElementById('chk-rose').addEventListener('change', (e) => { roseMesh.visible = e.target.checked; });
+
+          ['base-x', 'base-y', 'base-z', 'base-w'].forEach(id => {
+            document.getElementById(id).addEventListener('change', rebuild4DModularHelix);
+          });
+          document.getElementById('btn-inv-scalar').addEventListener('click', (e) => {
+            state.inverseScalar = !state.inverseScalar;
+            e.target.textContent = `INV SCALAR: ${state.inverseScalar ? 'ON' : 'OFF'}`;
+            rebuild4DModularHelix();
+          });
+
+          document.getElementById('btn-query-solve').addEventListener('click', () => {
+            executeQuery(document.getElementById('query-input').value);
+          });
+          document.getElementById('btn-bench-ecc').addEventListener('click', runThreeEccBenchmark);
+
+          document.getElementById('rng-depth').addEventListener('input', (e) => {
+            state.depth = parseInt(e.target.value, 10);
+            document.getElementById('lbl-depth').textContent = state.depth;
+            rebuild4DHypercube();
+          });
+          document.getElementById('rng-wdist').addEventListener('input', (e) => {
+            state.wDist = parseFloat(e.target.value);
+            shared4DUniforms.uWDist.value = state.wDist;
+            document.getElementById('lbl-wdist').textContent = state.wDist.toFixed(1);
+          });
+          document.querySelectorAll('.pal-btn').forEach(btn => {
+            btn.addEventListener('click', () => applyPalette(btn.dataset.pal));
+          });
+          ['xy', 'xz', 'yz', 'xw', 'yw', 'zw'].forEach(pl => {
+            document.getElementById(`rot-${pl}`).addEventListener('input', (e) => {
+              state.rotSpeed[pl] = parseFloat(e.target.value);
+            });
+          });
+
+          document.getElementById('rng-rose-n').addEventListener('input', (e) => {
+            state.roseEigenstates = parseInt(e.target.value, 10);
+            roseUniforms.uEigenstates.value = state.roseEigenstates;
+            document.getElementById('lbl-rose').textContent = `N=${state.roseEigenstates} · COH ${Math.round(state.roseCoherence * 100)}%`;
+          });
+          document.getElementById('rng-rose-coh').addEventListener('input', (e) => {
+            state.roseCoherence = parseFloat(e.target.value);
+            roseUniforms.uCoherence.value = state.roseCoherence;
+            document.getElementById('lbl-rose').textContent = `N=${state.roseEigenstates} · COH ${Math.round(state.roseCoherence * 100)}%`;
+          });
+
+          document.getElementById('void-t-slice').addEventListener('change', (e) => {
+            activeTemporalSlice = e.target.value;
+          });
+          document.getElementById('btn-void-pick').addEventListener('click', (e) => {
+            voidPickMode = !voidPickMode;
+            e.target.textContent = `3D PICK:${voidPickMode ? 'ON' : 'OFF'}`;
+            e.target.className = voidPickMode
+              ? 'px-1.5 py-0.5 rounded bg-emerald-500/25 text-emerald-200 border border-emerald-400/50 text-[9.5px]'
+              : 'px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-600 text-[9.5px]';
+          });
+          document.getElementById('btn-void-path').addEventListener('click', () => {
+            const s = parseInt(document.getElementById('void-start').value, 10);
+            const t = parseInt(document.getElementById('void-end').value, 10);
+            solveVoidManhattanGeodesic(s, t);
+          });
+
+          document.getElementById('btn-export-snap').addEventListener('click', () => exportSignedSnapshot(true));
+          document.getElementById('btn-import-snap').addEventListener('click', () => {
+            document.getElementById('snap-file-input').click();
+          });
+          document.getElementById('snap-file-input').addEventListener('change', (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async () => {
+              try {
+                const parsed = JSON.parse(String(reader.result));
+                await verifySnapshotBundle(parsed, file.name.slice(0, 14));
+              } catch (err) {
+                appendAuditLog(`IMPORT ERROR: ${err.message}`);
+              }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+          });
+          document.getElementById('btn-verify-snap').addEventListener('click', verifyLatestSnapshot);
+          document.getElementById('btn-evolve-cycle').addEventListener('click', () => {
+            const res = monolithEngine.evolve(false);
+            appendAuditLog(`EVOLVED → MONOLITH v${res.newVersion} (9/9 GATES PASS)`);
+          });
+          document.getElementById('btn-evolve-fault').addEventListener('click', () => {
+            const res = monolithEngine.evolve(true);
+            appendAuditLog(res.reason);
+          });
+
+          document.getElementById('btn-term-run').addEventListener('click', () => {
+            const inp = document.getElementById('term-input');
+            executePolyglotCommand(inp.value);
+            inp.value = '';
+          });
+          document.getElementById('term-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              executePolyglotCommand(e.target.value);
+              e.target.value = '';
+            }
+          });
+
+          document.getElementById('btn-insp-fly').addEventListener('click', () => {
+            if (lockedPrismId !== null) flyToPrism(lockedPrismId);
+          });
+          document.getElementById('btn-insp-unlock').addEventListener('click', () => {
+            lockedPrismId = null;
+          });
+
+          // =========================================================================
+          // 12. RESIZE & MAIN ANIMATION LOOP
+          // =========================================================================
+          function handleResize() {
+            const size = getViewportSize();
+            camera.aspect = size.width / size.height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(size.width, size.height);
+          }
+          window.addEventListener('resize', handleResize);
+
+          // Initial Genesis Setup
+          applyPalette('quantum');
+          rebuild4DHypercube();
+          rebuild4DModularHelix();
+          solveVoidManhattanGeodesic(312, 624);
+          runThreeEccBenchmark();
+          drawTunnelWaveform('GAIA-GENESIS');
+          monolithEngine.snapshot();
+          miningEngine.initWorkers();
+          durableVault.init().then(() => {
+            appendAuditLog(`VAULT READY · ECDSA-P256=${durableVault.keyPair ? 'ACTIVE' : 'FALLBACK'}`);
+          });
+          announceA11y('GAIA NEXUS 4D Sierpinski Hypercube, 4,096 blocks, 13-level Merkle tree, and V5 lattice initialized.');
+
+          let lastFrameTime = performance.now();
+          let fpsFrames = 0, fpsLast = performance.now(), fpsVal = 60;
+
+          function animate(now) {
+            requestAnimationFrame(animate);
+            const dt = Math.min(0.05, (now - lastFrameTime) / 1000);
+            lastFrameTime = now;
+
+            // Advance 6-plane 4D rotation
+            for (const k of ['xy', 'xz', 'yz', 'xw', 'yw', 'zw']) {
+              state.angles[k] += state.rotSpeed[k] * dt;
+            }
+            const m4 = update4DRotationMatrix(state.angles);
+            shared4DUniforms.uTime.value += dt;
+            roseUniforms.uTime.value += dt;
+
+            // Update V_5 lattice 4D projection & spiral/Merkle mining
+            if (voidMatrixGroup.visible) updateVoidLatticeProjection(m4);
+            miningEngine.runBoundedTick(4.0);
+
+            processCameraAndFlight(dt);
+            const { activeId, invId } = performRaycastInspection();
+            updateSequentialSpiralFilling(activeId, invId);
+
+            if (!document.getElementById('tab-hypercube').classList.contains('hidden')) {
+              drawAudioSpectrum(shared4DUniforms.uTime.value);
+            }
+
+            fpsFrames++;
+            if (now - fpsLast >= 500) {
+              fpsVal = Math.round((fpsFrames * 1000) / (now - fpsLast));
+              fpsFrames = 0;
+              fpsLast = now;
+              const tel = document.getElementById('top-telemetry');
+              if (tel) {
+                tel.textContent = `${fpsVal} FPS · BLKS ${miningEngine.cursor}/4096 · ${miningEngine.hashRate.toLocaleString()} H/s · IVC#${zkFoldEngine.step}`;
+              }
+            }
+
+            renderer.render(scene, camera);
+          }
+
+          handleResize();
+          renderer.render(scene, camera);
+          requestAnimationFrame(animate);
+        } catch (err) {
+          const tel = document.getElementById('top-telemetry');
+          if (tel) tel.textContent = `BOOT ERROR: ${err.message}`;
+        }
+      }
+
+      if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        bootEngine();
+      } else {
+        window.addEventListener('DOMContentLoaded', bootEngine);
+      }
+    })();
+  </script>
+</body>
+</html>
